@@ -28,12 +28,25 @@ export function initializeGame(
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // ステップ1: コンテナサイズを取得（CSS論理ピクセル）
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const businessCardRatio = 91 / 55; // 名刺の縦横比
-  const containerWidth = container.clientWidth || 910;
+  const businessCardRatio = 91 / 55;
   
-  // 名刺比率を維持してCSS論理ピクセルサイズを計算
+  // 1. container の clientWidth を取得
+  let containerWidth = container.clientWidth;
+  
+  // 2. 0 または異常に大きい場合はデフォルト値を使用
+  if (containerWidth === 0 || containerWidth > 2000) {
+    containerWidth = 600; // ← より現実的なデフォルト
+    console.warn(`Container "${containerId}" has invalid width. Using default: 600px`);
+  }
+  
+  // 3. CSS 論理ピクセルサイズを計算
   let cssWidth = containerWidth;
-  let cssHeight = cssWidth / businessCardRatio;
+  let cssHeight = containerWidth / businessCardRatio;
+  
+  // 4. container に明示的にサイズを設定（ユーザーが指定していない場合）
+  if (!container.style.height || container.style.height === '0px') {
+    container.style.height = `${cssHeight}px`;
+  }
   
   // 8の倍数に丸める（レンダリング最適化）
   cssWidth = Math.floor(cssWidth / 8) * 8;

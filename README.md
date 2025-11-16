@@ -20,25 +20,37 @@ Transform your business card into an interactive breakout game! A fun and creati
 ### Via CDN (Easiest)
 
 ```
-<div id="game-container"></div>
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #game-container {
+      width: 600px;  /* Required: specify container width */
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/business-card-breakout@latest/dist/index.umd.js"></script>
-<script>
-  const engine = BusinessCardBreakout.initializeGame(
-    'game-container',
-    {
-      name: 'Your Name',
-      title: 'Your Title',
-      company: 'Your Company',
-      email: 'your@email.com'
-    },
-    BusinessCardBreakout.DEFAULT_GAME_CONFIG,
-    'standard',
-    false
-  );
-  
-  engine.start();
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/business-card-breakout@latest/dist/index.umd.js"></script>
+  <script>
+    const engine = BusinessCardBreakout.initializeGame(
+      'game-container',
+      {
+        name: 'Your Name',
+        title: 'Your Title',
+        company: 'Your Company',
+        email: 'your@email.com'
+      },
+      BusinessCardBreakout.DEFAULT_GAME_CONFIG,
+      'standard',
+      false
+    );
+    
+    engine.start();
+  </script>
+</body>
+</html>
 ```
 
 ### Via npm
@@ -65,6 +77,35 @@ const engine = initializeGame(
 
 engine.start();
 ```
+
+
+## ⚠️ Important: Container Size
+
+**The container element must have a width specified.** The height is automatically calculated based on the business card aspect ratio (91:55).
+
+```
+<!-- ✅ Good: CSS style -->
+<style>
+  #game { width: 600px; }
+</style>
+<div id="game"></div>
+
+<!-- ✅ Good: Inline style -->
+<div id="game" style="width: 600px;"></div>
+
+<!-- ✅ Good: Responsive with max-width -->
+<style>
+  #game {
+    width: 100%;
+    max-width: 600px;
+  }
+</style>
+<div id="game"></div>
+
+<!-- ❌ Bad: No width specified (canvas will be too large) -->
+<div id="game"></div>
+```
+
 
 ## 📖 Documentation
 
@@ -157,6 +198,31 @@ engine.start();     // Start the game
 engine.stop();      // Stop the game
 engine.pause();     // Pause the game
 engine.resume();    // Resume the game
+```
+
+## 🎨 Recommended: Custom Font
+
+For a pixel-style retro look, add this font before the game script:
+```
+<link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400&family=DotGothic16&family=Press+Start+2P&family=ZCOOL+QingKe+HuangYou&family=Noto+Sans+Thai&family=Noto+Sans+Arabic&family=Noto+Sans+KR&display=swap" rel="stylesheet">
+```
+
+### Complete example:  
+```
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400&family=DotGothic16&family=Press+Start+2P&family=ZCOOL+QingKe+HuangYou&family=Noto+Sans+Thai&family=Noto+Sans+Arabic&family=Noto+Sans+KR&display=swap" rel="stylesheet">
+  <style>
+    #game { width: 600px; }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+  <script src="https://cdn.jsdelivr.net/npm/business-card-breakout@latest/dist/index.umd.js"></script>
+  <script>/* ... */</script>
+</body>
+</html>
 ```
 
 ## 🌐 Browser Support
