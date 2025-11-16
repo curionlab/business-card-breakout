@@ -1,0 +1,58 @@
+{
+  "name": "business-card-breakout",
+  "version": "1.0.0",
+  "description": "An embeddable library that transforms business card designs into a breakout game with physics, effects, and time-based block recovery",
+  "type": "module",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles": "./dist/styles.css"
+  },
+  "jsdelivr": "./dist/index.umd.js",
+  "unpkg": "./dist/index.umd.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "breakout",
+    "game",
+    "business-card",
+    "canvas",
+    "physics",
+    "embeddable",
+    "interactive",
+    "typescript",
+    "cdn"
+  ],
+  "author": "Takahiro Matsunari",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/curionlab/business-card-breakout.git"
+  },
+  "bugs": {
+    "url": "https://github.com/curionlab/business-card-breakout/issues"
+  },
+  "homepage": "https://github.com/curionlab/business-card-breakout#readme",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "terser": "^5.44.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}

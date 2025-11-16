@@ -1,0 +1,80 @@
+/* Business Card Breakout Game Styles */
+
+.business-card-breakout-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
+}
+
+.business-card-breakout-game {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  cursor: none;
+}
+
+.business-card-breakout-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border-left: 4px solid #00D4FF;
+}
+
+.business-card-breakout-info h3 {
+  margin: 0 0 10px 0;
+  color: #00D4FF;
+  font-size: 16px;
+}
+
+.business-card-breakout-info p {
+  margin: 5px 0;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.business-card-breakout-controls {
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border-left: 4px solid #FFD700;
+}
+
+.business-card-breakout-controls h4 {
+  margin: 0 0 10px 0;
+  color: #FFD700;
+  font-size: 14px;
+}
+
+.business-card-breakout-controls ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.business-card-breakout-controls li {
+  margin: 5px 0;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .business-card-breakout-container {
+    padding: 10px;
+  }
+
+  .business-card-breakout-info,
+  .business-card-breakout-controls {
+    font-size: 12px;
+  }
+
+  .business-card-breakout-info h3,
+  .business-card-breakout-controls h4 {
+    font-size: 14px;
+  }
+}

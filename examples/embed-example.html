@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Card Breakout - Embed Examples</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans:wght@400;700&family=Bitcount+Prop+Single:wght@400&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  
+    body {
+      font-family: 'Noto Sans JP', 'Noto Sans', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+  
+    .container {
+      max-width: 1400px;  /* ← 変更: 1200px → 1400px */
+      margin: 0 auto;
+    }
+  
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+  
+    .header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+  
+    .header p {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+  
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));  /* ← 変更: 400px → 480px */
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+  
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+  
+    .card:hover {
+      transform: translateY(-5px);
+    }
+  
+    .card h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+  
+    .card h3 {
+      color: #999;
+      font-size: 14px;
+      font-weight: 400;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  
+    .game-container {
+      width: 100%;
+      aspect-ratio: 91 / 55;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+  
+    .info {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+    }
+  
+    .info strong {
+      color: #333;
+    }
+  
+    .footer {
+      text-align: center;
+      color: white;
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  
+    .footer h3 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+  
+    .footer p {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+  
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 20px 0;
+      text-align: left;
+      line-height: 1.6;
+    }
+  
+    .code-comment {
+      color: #6a9955;
+    }
+  
+    .code-keyword {
+      color: #569cd6;
+    }
+  
+    .code-string {
+      color: #ce9178;
+    }
+
+    /* Integration Guide の見出し用スタイル */
+    .footer h4 {
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));  /* タブレット */
+      }
+    }
+  
+    @media (max-width: 768px) {
+      .container {
+        max-width: 100%;
+      }
+      
+      .grid {
+        grid-template-columns: 1fr;  /* スマホは1カラム */
+      }
+      
+      .header h1 {
+        font-size: 32px;
+      }
+    }
+  </style>
+  
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 Business Card Breakout</h1>
+      <p>Embed Interactive Games in Your Website</p>
+    </div>
+
+    <div class="grid">
+      <!-- Example 1: Professional Layout - Japanese Name -->
+      <div class="card">
+        <h3>Professional Layout</h3>
+        <h2>日本語名刺（フル版）</h2>
+        <div class="game-container" id="game1"></div>
+        <div class="info">
+          <strong>山田 太郎</strong> (Taro Yamada)<br>
+          シニアソフトウェアエンジニア<br>
+          「未来を創るコードを書く」<br>
+          テックコーポレーション株式会社<br>
+          taro.yamada@example.com<br>
+          +81-90-1234-5678<br>
+          SNS: @taroy_dev<br>
+          yamada-tech.example
+        </div>
+      </div>
+    
+      <!-- Example 2: Professional Layout - English Name -->
+      <div class="card">
+        <h3>Professional Layout</h3>
+        <h2>English Name Card (Full)</h2>
+        <div class="game-container" id="game2"></div>
+        <div class="info">
+          <strong>Jane Smith</strong><br>
+          Product Manager<br>
+          "Building products people love"<br>
+          Innovation Labs Inc.<br>
+          jane.smith@example.com<br>
+          +1-555-0102<br>
+          SNS: @janesmith_pm<br>
+          janesmith.example
+        </div>
+      </div>
+    
+      <!-- Example 3: Standard Layout -->
+      <div class="card">
+        <h3>Standard Layout</h3>
+        <h2>基本レイアウト</h2>
+        <div class="game-container" id="game3"></div>
+        <div class="info">
+          <strong>Alex Johnson</strong><br>
+          UX/UI Designer<br>
+          Creative Studio<br>
+          alex.johnson@example.com<br>
+          +1-555-0103<br>
+          alexjohnson.example
+        </div>
+      </div>
+    
+      <!-- Example 4: Minimal Layout -->
+      <div class="card">
+        <h3>Minimal Layout</h3>
+        <h2>ミニマルレイアウト</h2>
+        <div class="game-container" id="game4"></div>
+        <div class="info">
+          <strong>Sarah Williams</strong><br>
+          Founder & CEO<br>
+          StartupHub<br>
+          sarah@example.com
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <h3>📦 Integration Guide</h3>
+      <p>Add this to your HTML to embed the game:</p>
+      
+      <!-- Basic Example -->
+      <h4 style="color: white; margin-top: 30px; margin-bottom: 10px;">Basic Usage</h4>
+      <div class="code-block">
+    <span class="code-comment">// Import the library and default config</span><br>
+    <span class="code-keyword">import</span> { initializeGame, DEFAULT_GAME_CONFIG } <span class="code-keyword">from</span> <span class="code-string">'business-card-breakout'</span>;<br>
+    <br>
+    <span class="code-comment">// Initialize with default settings (recommended)</span><br>
+    <span class="code-keyword">const</span> engine = initializeGame(<br>
+    &nbsp;&nbsp;<span class="code-string">'game-container'</span>,&nbsp;&nbsp;<span class="code-comment">// Container ID</span><br>
+    &nbsp;&nbsp;{<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;name: <span class="code-string">'Your Name'</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;title: <span class="code-string">'Your Title'</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;company: <span class="code-string">'Your Company'</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;email: <span class="code-string">'your@email.com'</span><br>
+    &nbsp;&nbsp;},<br>
+    &nbsp;&nbsp;DEFAULT_GAME_CONFIG,&nbsp;&nbsp;<span class="code-comment">// Use default settings</span><br>
+    &nbsp;&nbsp;<span class="code-string">'standard'</span>,&nbsp;&nbsp;<span class="code-comment">// Layout: 'professional' | 'standard' | 'minimal'</span><br>
+    &nbsp;&nbsp;<span class="code-keyword">false</span>&nbsp;&nbsp;<span class="code-comment">// autoStart (best practice: false)</span><br>
+    );<br>
+    <br>
+    <span class="code-comment">// Explicitly start the game</span><br>
+    engine.start();
+      </div>
+    
+      <!-- Advanced Example -->
+      <h4 style="color: white; margin-top: 30px; margin-bottom: 10px;">Advanced Configuration</h4>
+      <div class="code-block">
+    <span class="code-comment">// Full example with all optional fields</span><br>
+    <span class="code-keyword">const</span> engine = initializeGame(<br>
+    &nbsp;&nbsp;<span class="code-string">'game-container'</span>,<br>
+    &nbsp;&nbsp;{<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;name: <span class="code-string">'山田 太郎'</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;nameEn: <span class="code-string">'Taro Yamada'</span>,&nbsp;&nbsp;<span class="code-comment">// Optional: English name for non-English names</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;title: <span class="code-string">'Senior Software Engineer'</span>,&nbsp;&nbsp;<span class="code-comment">// Optional</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;company: <span class="code-string">'Tech Corp'</span>,&nbsp;&nbsp;<span class="code-comment">// Optional</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;tagline: <span class="code-string">'Building the future'</span>,&nbsp;&nbsp;<span class="code-comment">// Optional: Company or personal tagline</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;email: <span class="code-string">'taro@example.com'</span>,&nbsp;&nbsp;<span class="code-comment">// Optional</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;phone: <span class="code-string">'+81-90-1234-5678'</span>,&nbsp;&nbsp;<span class="code-comment">// Optional</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;sns: <span class="code-string">'@taroy_dev'</span>,&nbsp;&nbsp;<span class="code-comment">// Optional: SNS handle or URL</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;website: <span class="code-string">'yamada.example'</span>&nbsp;&nbsp;<span class="code-comment">// Optional</span><br>
+    &nbsp;&nbsp;},<br>
+    &nbsp;&nbsp;DEFAULT_GAME_CONFIG,<br>
+    &nbsp;&nbsp;<span class="code-string">'professional'</span>,<br>
+    &nbsp;&nbsp;<span class="code-keyword">false</span><br>
+    );<br>
+    <br>
+    engine.start();
+      </div>
+    
+      <!-- Custom Game Config -->
+      <h4 style="color: white; margin-top: 30px; margin-bottom: 10px;">Custom Game Settings</h4>
+      <div class="code-block">
+    <span class="code-comment">// Customize game behavior</span><br>
+    <span class="code-keyword">const</span> customConfig = {<br>
+    &nbsp;&nbsp;ballSpeed: <span class="code-keyword">8</span>,&nbsp;&nbsp;<span class="code-comment">// Ball speed (default: 10)</span><br>
+    &nbsp;&nbsp;ballRadius: <span class="code-keyword">10</span>,&nbsp;&nbsp;<span class="code-comment">// Ball size (default: 12)</span><br>
+    &nbsp;&nbsp;paddleSpeed: <span class="code-keyword">10</span>,&nbsp;&nbsp;<span class="code-comment">// Paddle movement speed (default: 12)</span><br>
+    &nbsp;&nbsp;paddleWidthRatio: <span class="code-keyword">0.15</span>,&nbsp;&nbsp;<span class="code-comment">// Paddle width ratio (default: 0.2)</span><br>
+    &nbsp;&nbsp;paddleHeight: <span class="code-keyword">3</span>,&nbsp;&nbsp;<span class="code-comment">// Paddle height (default: 4)</span><br>
+    &nbsp;&nbsp;blockRecoveryTime: <span class="code-keyword">10000</span>,&nbsp;&nbsp;<span class="code-comment">// Block recovery time in ms (default: 10000)</span><br>
+    &nbsp;&nbsp;effectDuration: <span class="code-keyword">5000</span>,&nbsp;&nbsp;<span class="code-comment">// Visual effect duration in ms (default: 5000)</span><br>
+    &nbsp;&nbsp;destructionRadius: <span class="code-keyword">30</span>,&nbsp;&nbsp;<span class="code-comment">// Area around ball that destroys blocks (default: 30)</span><br>
+    &nbsp;&nbsp;gravity: <span class="code-keyword">0</span>,&nbsp;&nbsp;<span class="code-comment">// Gravity (default: 0)</span><br>
+    &nbsp;&nbsp;friction: <span class="code-keyword">1.0</span>&nbsp;&nbsp;<span class="code-comment">// Ball friction (default: 1.0)</span><br>
+    };<br>
+    <br>
+    <span class="code-keyword">const</span> engine = initializeGame(<br>
+    &nbsp;&nbsp;<span class="code-string">'game-container'</span>,<br>
+    &nbsp;&nbsp;{ <span class="code-comment">/* business card info */</span> },<br>
+    &nbsp;&nbsp;customConfig,&nbsp;&nbsp;<span class="code-comment">// Use custom settings</span><br>
+    &nbsp;&nbsp;<span class="code-string">'minimal'</span>,<br>
+    &nbsp;&nbsp;<span class="code-keyword">false</span><br>
+    );<br>
+    <br>
+    engine.start();
+      </div>
+    
+      <!-- Layout Options -->
+      <h4 style="color: white; margin-top: 30px; margin-bottom: 10px;">Layout Options</h4>
+      <div class="code-block">
+    <span class="code-comment">// Available layouts:</span><br>
+    <br>
+    <span class="code-comment">// 'professional' - Full layout with all fields including SNS</span><br>
+    <span class="code-comment">//   Best for: Complete business cards with social media</span><br>
+    <span class="code-comment">//   Displays: Name, Title, Tagline, Company, Email, Phone, SNS, Website</span><br>
+    <br>
+    <span class="code-comment">// 'standard' - Standard layout with basic contact info</span><br>
+    <span class="code-comment">//   Best for: Traditional business cards</span><br>
+    <span class="code-comment">//   Displays: Name, Title, Company, Email, Phone, Website</span><br>
+    <br>
+    <span class="code-comment">// 'minimal' - Minimal layout with essential info only</span><br>
+    <span class="code-comment">//   Best for: Clean, simple cards</span><br>
+    <span class="code-comment">//   Displays: Name, Title, Company, Email</span>
+      </div>
+    
+      <p style="margin-top: 30px; font-size: 18px; opacity: 0.9;">
+        🎯 Perfect for portfolios, networking events, and creative websites!
+      </p>
+      
+      <p style="margin-top: 15px; font-size: 14px; opacity: 0.7;">
+        📚 <a href="https://github.com/yourusername/business-card-breakout" style="color: #fff; text-decoration: underline;">View Documentation</a> | 
+        <a href="https://www.npmjs.com/package/business-card-breakout" style="color: #fff; text-decoration: underline;">npm Package</a>
+      </p>
+    </div>
+    
+  </div>
+
+  <script type="module">
+    import { initializeGame, DEFAULT_GAME_CONFIG } from '../dist/index.js';
+  
+    const games = [
+      {
+        id: 'game1',
+        layout: 'professional',
+        businessCard: {
+          name: '山田 太郎',
+          nameEn: 'Taro Yamada',
+          title: 'シニアソフトウェアエンジニア',
+          tagline: '未来を創るコードを書く',
+          company: 'テックコーポレーション株式会社',
+          email: 'taro.yamada@example.com',
+          phone: '+81-90-1234-5678',
+          sns: '@taroy_dev',
+          website: 'yamada-tech.example'
+        }
+      },
+      {
+        id: 'game2',
+        layout: 'professional',
+        businessCard: {
+          name: 'Jane Smith',
+          title: 'Product Manager',
+          tagline: 'Building products people love',
+          company: 'Innovation Labs Inc.',
+          email: 'jane.smith@example.com',
+          phone: '+1-555-0102',
+          sns: '@janesmith_pm',
+          website: 'janesmith.example'
+        }
+      },
+      {
+        id: 'game3',
+        layout: 'standard',
+        businessCard: {
+          name: 'Alex Johnson',
+          nameEn: 'Alex Johnson',
+          title: 'UX/UI Designer',
+          company: 'Creative Studio',
+          email: 'alex.johnson@example.com',
+          phone: '+1-555-0103',
+          website: 'alexjohnson.example'
+        }
+      },
+      {
+        id: 'game4',
+        layout: 'minimal',
+        businessCard: {
+          name: 'Sarah Williams',
+          title: 'Founder & CEO',
+          company: 'StartupHub',
+          email: 'sarah@example.com'
+        }
+      }
+    ];
+  
+    // Initialize all games (best practice)
+    games.forEach(({ id, businessCard, layout }) => {
+      const engine = initializeGame(
+        id,
+        businessCard,
+        {},
+        layout,
+        false
+      );
+      engine.start();
+    });
+  </script>
+  
+</body>
+</html>
