@@ -24,9 +24,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:demo": "vite build --config vite.config.demo.ts",
+    "build:demo": "vite build --mode demo",
     "preview": "vite preview",
-    "preview:demo": "vite preview --config vite.config.demo.ts --outDir dist-demo",
     "type-check": "tsc --noEmit",
     "prepublishOnly": "npm run type-check && npm run build"
   },
