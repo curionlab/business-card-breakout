@@ -23,9 +23,12 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
+    "build:demo": "vite build --config vite.config.demo.ts",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "preview:demo": "vite preview --config vite.config.demo.ts --outDir dist-demo",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run type-check && npm run build"
   },
   "keywords": [
     "breakout",
