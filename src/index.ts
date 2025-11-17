@@ -1,5 +1,7 @@
 import { GameEngine } from './GameEngine';
 import { BusinessCardInfo, GameConfig } from './types';
+import { CardLayout } from './BlockManager';
+import { DEFAULT_GAME_CONFIG, DEFAULT_BUSINESS_CARD } from './config';
 
 export { GameEngine };
 export type { BusinessCardInfo, GameConfig, Block, Ball, Paddle, Particle } from './types';
@@ -17,7 +19,7 @@ export function initializeGame(
   containerId: string,
   businessCard?: Partial<BusinessCardInfo>,  // ← 変更: 第2引数
   gameConfig?: Partial<GameConfig>,           // ← 変更: 第3引数に移動
-  layout: 'standard' | 'professional' | 'minimal' = 'standard',
+  layout: CardLayout = 'standard',
   autoStart: boolean = false  // ← 追加: デフォルトで自動開始しない
 ): GameEngine {
   const container = document.getElementById(containerId);
@@ -29,15 +31,15 @@ export function initializeGame(
   // ステップ1: コンテナサイズを取得（CSS論理ピクセル）
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const businessCardRatio = 91 / 55;
+  const minWidth = 320;
+  const maxWidth = 910;
+
+  // 1. container の clientWidth を取得。設定されていない場合は600をデフォルトとする。
+  let containerWidth = container.clientWidth || 600;
   
-  // 1. container の clientWidth を取得
-  let containerWidth = container.clientWidth;
-  
-  // 2. 0 または異常に大きい場合はデフォルト値を使用
-  if (containerWidth === 0 || containerWidth > 2000) {
-    containerWidth = 600; // ← より現実的なデフォルト
-    console.warn(`Container "${containerId}" has invalid width. Using default: 600px`);
-  }
+  // 2. 小さすぎる場合はminWidth, 最大でもmaxWidthとなるように制御
+  // 範囲制限
+  containerWidth = Math.max(minWidth, Math.min(maxWidth, containerWidth));
   
   // 3. CSS 論理ピクセルサイズを計算
   let cssWidth = containerWidth;
@@ -52,18 +54,13 @@ export function initializeGame(
   cssWidth = Math.floor(cssWidth / 8) * 8;
   cssHeight = Math.floor(cssHeight / 8) * 8;
   
-  // 最小サイズを保証（スマホで小さくなりすぎない）
-  const minWidth = 320;
-  if (cssWidth < minWidth) {
-    cssWidth = minWidth;
-    cssHeight = Math.floor((cssWidth / businessCardRatio) / 8) * 8;
-  }
+
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // ステップ2: DPRを取得して物理ピクセルを計算
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const dpr = window.devicePixelRatio || 1;
-  
+
   // Canvas内部解像度（物理ピクセル）= CSS論理ピクセル × DPR
   const physicalWidth = Math.floor((cssWidth * dpr) / 8) * 8;
   const physicalHeight = Math.floor((cssHeight * dpr) / 8) * 8;
@@ -93,6 +90,7 @@ export function initializeGame(
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // GameEngineには論理ピクセルサイズとDPRを渡す
   const mergedConfig = {
+    ...DEFAULT_GAME_CONFIG,
     ...gameConfig,
     width: cssWidth,        // ← 論理ピクセル（ゲームロジック用）
     height: cssHeight,      // ← 論理ピクセル（ゲームロジック用）
@@ -102,23 +100,16 @@ export function initializeGame(
 
   const gameEngine = new GameEngine(canvas, mergedConfig);
   
-  // ← 追加: 名刺情報で初期化
-  if (businessCard) {
-    const cardInfo: BusinessCardInfo = {
-      name: businessCard.name,
-      nameEn: businessCard.nameEn,
-      title: businessCard.title,
-      company: businessCard.company,
-      tagline: businessCard.tagline,
-      email: businessCard.email,
-      phone: businessCard.phone,
-      sns: businessCard.sns,
-      website: businessCard.website
-    };
-    gameEngine.initializeWithBusinessCard(cardInfo, layout);
-    if (autoStart) {  // ← 変更: 条件付きで開始
-      gameEngine.start();
-    }
+  // 名刺情報を設定
+  const cardInfo = {
+    ...DEFAULT_BUSINESS_CARD,
+    ...businessCard
+  };
+  gameEngine.initializeWithBusinessCard(cardInfo, layout);
+
+  // 自動スタート
+  if (autoStart) {
+    gameEngine.start();
   }
 
   return gameEngine;

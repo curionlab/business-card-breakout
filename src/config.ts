@@ -27,7 +27,7 @@
     ballSpeed: 10,
     ballRadius: 12,
     paddleSpeed: 12,
-    paddleWidthRatio: 0.2,
+    paddleWidthRatio: 0.4,
     paddleHeight: 4,
     gravity: 0,
     friction: 1.0,
