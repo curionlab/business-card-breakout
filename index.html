@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Card Breakout - Interactive Game</title>
+  <!-- Google Fonts: DotGothic16 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400&family=DotGothic16&family=Press+Start+2P&family=ZCOOL+QingKe+HuangYou&family=Noto+Sans+Thai&family=Noto+Sans+Arabic&family=Noto+Sans+KR&display=swap" rel="stylesheet">
+  
+  <style>
+  * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+      color: #ffffff;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #00D4FF, #FFD700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #b0b0b0;
+      margin-bottom: 30px;
+    }
+
+    .game-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .form-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 14px;
+      color: #00D4FF;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input {
+      padding: 12px;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #00D4FF;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* selectタグのスタイル追加 */
+    select {
+      padding: 12px;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #00D4FF;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* selectのオプション（ドロップダウン内）のスタイル */
+    select option {
+      background: #1a1a2e;
+      color: #ffffff;
+      padding: 10px;
+    }
+
+
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #00D4FF, #0099CC);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+      margin-bottom: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #FF6B6B, #FF5252);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+    }
+
+    #gameContainer {
+      width: 100%;
+      max-width: 910px;
+      aspect-ratio: 91 / 55;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
+      margin: 0 auto;
+    }
+
+    .instructions {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 25px;
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+
+    .instructions h2 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: #00D4FF;
+    }
+
+    .instructions ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .instructions li {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 16px;
+    }
+
+    .instructions li:last-child {
+      border-bottom: none;
+    }
+
+    @media (max-width: 768px) {
+      .form-section {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 36px;
+      }
+
+      #gameContainer {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+  <script type="module" crossorigin src="/business-card-breakout/assets/index-Pp6FB5aY.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎮 Business Card Breakout</h1>
+      <p class="subtitle">Your business card becomes an interactive game!</p>
+    </header>
+
+    <div class="game-section">
+      <h2 style="color: #00D4FF; margin-bottom: 20px;">Business Card Information</h2>
+      
+      <div class="form-section">
+        <div class="form-group">
+          <label for="nameInput">Name</label>
+          <input type="text" id="nameInput" />
+        </div>
+        
+        <div class="form-group">
+          <label for="nameEnInput">Name (English)</label>
+          <input type="text" id="nameEnInput" placeholder="Optional" />
+        </div>
+        
+        <div class="form-group">
+          <label for="titleInput">Title / Position</label>
+          <input type="text" id="titleInput" />
+        </div>
+        
+        <div class="form-group">
+          <label for="taglineInput">Tagline / Catchphrase</label>
+          <input type="text" id="taglineInput" placeholder="Optional" />
+        </div>
+        
+        <div class="form-group">
+          <label for="companyInput">Company</label>
+          <input type="text" id="companyInput" />
+        </div>
+        
+        <div class="form-group">
+          <label for="emailInput">Email</label>
+          <input type="text" id="emailInput" />
+        </div>
+        
+        <div class="form-group">
+          <label for="phoneInput">Phone</label>
+          <input type="tel" id="phoneInput" placeholder="電話番号" />
+        </div>
+        
+        <div class="form-group">
+          <label for="snsInput">SNS</label>
+          <input type="text" id="snsInput" placeholder="SNS (X/LinkedIn etc.)" />
+        </div>
+        
+        <div class="form-group">
+          <label for="websiteInput">Website</label>
+          <input type="text" id="websiteInput" />
+        </div>
+        
+        <div class="form-group" style="grid-column: 1 / 0;">
+          <label for="layoutSelect">Card Layout</label>
+          <select id="layoutSelect">
+            <option value="standard">Standard</option>
+            <option value="professional">Professional</option>
+            <option value="minimal">Minimal</option>
+          </select>
+        </div>
+      </div>
+      
+      <button class="btn-primary" onclick="startGame()">START GAME</button>
+
+      <div id="gameContainer"></div>
+    </div>
+
+    <div class="instructions">
+      <h2>How to Play</h2>
+      <ul>
+        <li>• Move your paddle left and right using <strong>Arrow Keys</strong>, <strong>A/D Keys</strong>, or <strong>Mouse</strong></li>
+        <li>• Click or press <strong>SPACE</strong> to start the game</li>
+        <li>• Break all the blocks containing your business card information</li>
+        <li>• Blocks will regenerate after 5 seconds - keep playing!</li>
+        <li>• Press <strong>START GAME</strong> button to restart anytime</li>
+      </ul>
+    </div>
+  </div>
+
+</body>
+</html>
