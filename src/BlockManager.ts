@@ -55,35 +55,34 @@ export class BlockManager {
     fontSize: number,
     fontFamily: string,
     align: 'left' | 'center' | 'right' = 'left'
-  ): number {
+  ): { actualHeight: number; metrics: TextMetrics } {  // ← 戻り値を変更
     ctx.font = `${fontSize}px ${fontFamily}`;
-    const textWidth = ctx.measureText(text).width;
+    const metrics = ctx.measureText(text);
+    const textWidth = metrics.width;
     
     if (textWidth <= maxWidth) {
-      // 収まる場合はそのまま描画
       ctx.textAlign = align;
       ctx.fillText(text, x, y);
-      return fontSize;
+      
+      // ← 実際の高さを計算
+      const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      return { actualHeight, metrics };
     }
     
-    // はみ出る場合は横方向だけスケール（横長変形）
+    // はみ出る場合は横方向だけスケール
     const scaleX = maxWidth / textWidth;
-    
     ctx.save();
-    
-    // 描画位置を調整
     const drawX = x / scaleX;
-    
-    // 横方向のみスケール
     ctx.scale(scaleX, 1);
     ctx.textAlign = align;
     ctx.fillText(text, drawX, y);
-    
     ctx.restore();
     
-    // 高さは元のまま返す
-    return fontSize;
+    // ← 実際の高さを計算（スケールしても高さは変わらない）
+    const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    return { actualHeight, metrics };
   }
+  
 
 
   /**
@@ -158,7 +157,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx, 
         cardInfo.name, 
         padding, 
@@ -181,7 +180,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx,
         cardInfo.title,
         padding,
@@ -204,7 +203,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx,
         cardInfo.company,
         padding,
@@ -235,7 +234,7 @@ export class BlockManager {
         const startY = currentY;
         const fontFamily = this.getFontFamily(item.data);
         
-        const actualHeight = this.drawTextFitToWidth(
+        const { actualHeight } = this.drawTextFitToWidth(
           ctx,
           item.data,
           padding,
@@ -322,7 +321,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx, 
         cardInfo.company, 
         tempWidth / 2, 
@@ -345,7 +344,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx, 
         cardInfo.tagline, 
         tempWidth / 2, 
@@ -368,7 +367,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx, 
         cardInfo.name, 
         padding, 
@@ -391,7 +390,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx, 
         cardInfo.nameEn, 
         padding, 
@@ -414,7 +413,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx, 
         cardInfo.title, 
         padding, 
@@ -456,7 +455,7 @@ export class BlockManager {
         const dataMaxWidth = availableWidth - labelMaxWidth - gap;
         
         // ラベルをdrawTextFitToWidthで描画（縮小可能）
-        const labelHeight = this.drawTextFitToWidth(
+        const { actualHeight: labelHeight } = this.drawTextFitToWidth(
           ctx,
           item.label,
           padding,
@@ -469,7 +468,7 @@ export class BlockManager {
         
         // データをdrawTextFitToWidthで描画（開始位置を揃える）
         const dataStartX = padding + labelMaxWidth + gap;
-        const dataHeight = this.drawTextFitToWidth(
+        const { actualHeight: dataHeight } = this.drawTextFitToWidth(
           ctx,
           item.data,
           dataStartX,
@@ -561,7 +560,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx,
         cardInfo.name,
         tempWidth / 2,
@@ -585,7 +584,7 @@ export class BlockManager {
       const maxWidth = tempWidth - padding * 2;
       
       ctx.textBaseline = 'top';
-      const actualHeight = this.drawTextFitToWidth(
+      const { actualHeight }= this.drawTextFitToWidth(
         ctx,
         titleText,
         tempWidth / 2,
@@ -616,7 +615,7 @@ export class BlockManager {
         const startY = currentY;
         const fontFamily = this.getFontFamily(item.data);
         
-        const actualHeight = this.drawTextFitToWidth(
+        const { actualHeight }= this.drawTextFitToWidth(
           ctx,
           item.data,
           tempWidth / 2,
