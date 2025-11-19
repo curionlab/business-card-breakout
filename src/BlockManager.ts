@@ -10,8 +10,8 @@ export class BlockManager {
   private elementColors: { [key: string]: string };
 
   constructor(
-    blockRecoveryTime: number = 5000, 
-    blockFadeInTime: number = 1000, 
+    blockRecoveryTime: number = 10000, 
+    blockFadeInTime: number = 5000, 
     dpr: number = 1,
     elementColors: { [key: string]: string } = {} 
   ) {
@@ -26,22 +26,21 @@ export class BlockManager {
   }
 
   /**
-   * フォントサイズを計算(DPR反映し、CSS理論解像度→物理解像度)
+   * フォントサイズを計算(論理ピクセル)
    */
   private calculateFontSize(baseRatio: number, canvasHeight: number, minSize: number = 16): number {
-    const size = canvasHeight * baseRatio * this.dpr;
-    // ← 小数点を四捨五入して整数に
+    const size = canvasHeight * baseRatio;
     return Math.max(Math.round(size), minSize);
   }
 
   /**
-   * キャンバスサイズを計算(DPR反映し、CSS理論解像度→物理解像度)
+   * キャンバスサイズを計算(論理ピクセル)
    */
   private calculateCanvasSize(ratio: number, dimension: number): number {
-    const size = dimension * ratio * this.dpr;
-    // ← 小数点を四捨五入して整数に（色の重なり対策）
+    const size = dimension * ratio;
     return Math.round(size);
   }
+
 
   /**
    * テキストを描画し、横幅に収める（高さは維持）
@@ -115,71 +114,77 @@ export class BlockManager {
     canvasHeight: number,
     pixelSize: number
   ): void {
-
     const tempCanvas = document.createElement('canvas');
-    const ctx = tempCanvas.getContext('2d', { 
-      willReadFrequently: true
-    });
+    const ctx = tempCanvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    ctx.imageSmoothingEnabled = true;
-    
-    // DPR反映
+    // 論理サイズで計算
     const padding = this.calculateCanvasSize(0.08, canvasHeight);
-    const tempWidth = this.calculateCanvasSize(0.85, canvasWidth);
-    const tempHeight = this.calculateCanvasSize(0.81, canvasHeight);
-    
+    const logicalTempWidth = this.calculateCanvasSize(0.85, canvasWidth);
+    const logicalTempHeight = this.calculateCanvasSize(0.81, canvasHeight);
+
     console.log('createStandardLayout:', {
-      canvasWidth, 
-      canvasHeight, 
+      canvasWidth,
+      canvasHeight,
       padding,
-      tempWidth, 
-      tempHeight, 
+      logicalTempWidth,
+      logicalTempHeight,
       dpr: this.dpr
     });
 
-    tempCanvas.width = tempWidth;
-    tempCanvas.height = tempHeight;
+    // Canvas実体は物理解像度
+    tempCanvas.width = logicalTempWidth * this.dpr;
+    tempCanvas.height = logicalTempHeight * this.dpr;
+
     ctx.imageSmoothingEnabled = true;
-    
     ctx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+    // DPRスケール適用（以降は論理座標）
+    ctx.scale(this.dpr, this.dpr);
     ctx.fillStyle = '#FFFFFF';
 
     let currentY = padding;
-    const elementPositions: Array<{start: number, end: number, type: string}> = [];
+    const elementPositions: Array<{ start: number; end: number; type: string }> = [];
 
-    // 名前（左寄せ・大きく）
+    // 行送り用パラメータ
+    const baseLineGapName     = 1.5;
+    const baseLineGapTitle    = 1.6;
+    const baseLineGapCompany  = 1.8;
+    const baseLineGapContact  = 1.5;
+    const extraLineSpace      = 1;   // 追加のピクセル行間
+
+    // 名前
     if (cardInfo.name) {
       const fontSize = this.calculateFontSize(0.095, canvasHeight, 16);
-      console.log('fontSize:', fontSize);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.name);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
       ctx.textBaseline = 'top';
+
       const { actualHeight } = this.drawTextFitToWidth(
-        ctx, 
-        cardInfo.name, 
-        padding, 
-        currentY, 
-        maxWidth, 
-        fontSize, 
-        fontFamily, 
+        ctx,
+        cardInfo.name,
+        padding,
+        currentY,
+        maxWidth,
+        fontSize,
+        fontFamily,
         'left'
       );
-      
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'name'});
-      currentY += actualHeight * 1.5;
+
+      const step = actualHeight * baseLineGapName;
+      elementPositions.push({ start: startY, end: startY + step, type: 'name' });
+      currentY += step + extraLineSpace;
     }
 
-    // 肩書き（左寄せ）
+    // 肩書き
     if (cardInfo.title) {
       const fontSize = this.calculateFontSize(0.055, canvasHeight, 16);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.title);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
       ctx.textBaseline = 'top';
+
       const { actualHeight } = this.drawTextFitToWidth(
         ctx,
         cardInfo.title,
@@ -190,19 +195,20 @@ export class BlockManager {
         fontFamily,
         'left'
       );
-      
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'title'});
-      currentY += actualHeight * 1.6;
+
+      const step = actualHeight * baseLineGapTitle;
+      elementPositions.push({ start: startY, end: startY + step, type: 'title' });
+      currentY += step + extraLineSpace;
     }
 
-    // 会社（左寄せ）
+    // 会社
     if (cardInfo.company) {
       const fontSize = this.calculateFontSize(0.065, canvasHeight, 16);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.company);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
       ctx.textBaseline = 'top';
+
       const { actualHeight } = this.drawTextFitToWidth(
         ctx,
         cardInfo.company,
@@ -214,42 +220,44 @@ export class BlockManager {
         'left'
       );
 
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'company'});
-      currentY += actualHeight * 1.8;
+      const step = actualHeight * baseLineGapCompany;
+      elementPositions.push({ start: startY, end: startY + step, type: 'company' });
+      currentY += step + extraLineSpace;
     }
 
-    // 連絡先（左寄せ）
-    const contactFontSize = this.calculateFontSize(0.040, canvasHeight, 16);
-    const maxWidth = tempWidth - padding * 2;
-    
+    // 連絡先
+    const contactFontSize = this.calculateFontSize(0.040, canvasHeight, 12);
+    const contactMaxWidth = logicalTempWidth - padding * 2;
     ctx.textBaseline = 'top';
-    
+
     [
-      { data: cardInfo.email, type: 'email' },
-      { data: cardInfo.phone, type: 'phone' },
-      { data: cardInfo.sns, type: 'sns' },
+      { data: cardInfo.email,   type: 'email' },
+      { data: cardInfo.phone,   type: 'phone' },
+      { data: cardInfo.sns,     type: 'sns' },
       { data: cardInfo.website, type: 'website' }
     ].forEach(item => {
-      if (item.data) {
-        const startY = currentY;
-        const fontFamily = this.getFontFamily(item.data);
-        
-        const { actualHeight } = this.drawTextFitToWidth(
-          ctx,
-          item.data,
-          padding,
-          currentY,
-          maxWidth,
-          contactFontSize,
-          fontFamily,
-          'left'
-        );
+      if (!item.data) return;
 
-        elementPositions.push({start: startY, end: startY + actualHeight, type: item.type});
-        currentY += actualHeight * 1.4;
-      }
+      const startY = currentY;
+      const fontFamily = this.getFontFamily(item.data);
+
+      const { actualHeight } = this.drawTextFitToWidth(
+        ctx,
+        item.data,
+        padding,
+        currentY,
+        contactMaxWidth,
+        contactFontSize,
+        fontFamily,
+        'left'
+      );
+
+      const step = actualHeight * baseLineGapContact;
+      elementPositions.push({ start: startY, end: startY + step, type: item.type });
+      currentY += step + extraLineSpace;
     });
 
+    // ブロック生成
     this.generateBlocksFromCanvas(
       tempCanvas,
       canvasWidth,
@@ -280,215 +288,226 @@ export class BlockManager {
     pixelSize: number
   ): void {
     const tempCanvas = document.createElement('canvas');
-    const ctx = tempCanvas.getContext('2d', { 
+    const ctx = tempCanvas.getContext('2d', {
       willReadFrequently: true
     });
     if (!ctx) return;
-  
+
     ctx.imageSmoothingEnabled = true;
-    
-    
-    //DPR反映
+
+    // 論理ピクセルでレイアウト計算
     const padding = this.calculateCanvasSize(0.08, canvasHeight);
-    const tempWidth = this.calculateCanvasSize(0.85, canvasWidth);
-    const tempHeight = this.calculateCanvasSize(0.81, canvasHeight);
-    
-    console.log('createProfessionalLayout:', {
-      canvasWidth, 
-      canvasHeight, 
+    const logicalTempWidth = this.calculateCanvasSize(0.85, canvasWidth);
+    const logicalTempHeight = this.calculateCanvasSize(0.81, canvasHeight);
+
+    console.log('createProfessionalLayout (logical):', {
+      canvasWidth,
+      canvasHeight,
       padding,
-      tempWidth, 
-      tempHeight, 
+      logicalTempWidth,
+      logicalTempHeight,
       dpr: this.dpr
     });
 
+    // Canvas 実体は物理解像度
+    tempCanvas.width = logicalTempWidth * this.dpr;
+    tempCanvas.height = logicalTempHeight * this.dpr;
 
-    tempCanvas.width = tempWidth;
-    tempCanvas.height = tempHeight;
     ctx.imageSmoothingEnabled = true;
-    
     ctx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+    // DPR スケールを適用して以降は論理座標で描画
+    ctx.scale(this.dpr, this.dpr);
     ctx.fillStyle = '#FFFFFF';
-  
+
+    // 行送り用パラメータ
+    const baseLineGapCompany   = 1.3;
+    const baseLineGapTagline   = 2.0;
+    const baseLineGapName      = 1.4;
+    const baseLineGapNameEn    = 1.5;
+    const baseLineGapTitle     = 2.0;
+    const baseLineGapContact   = 1.4;
+    const lineSpace            = 1;   // 追加の1px行間
+
     let currentY = padding;
-    const elementPositions: Array<{start: number, end: number, type: string}> = [];
-  
+    const elementPositions: Array<{ start: number; end: number; type: string }> = [];
+
     // 会社名（中央）
     if (cardInfo.company) {
       const fontSize = this.calculateFontSize(0.08, canvasHeight, 12);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.company);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
+
       ctx.textBaseline = 'top';
       const { actualHeight } = this.drawTextFitToWidth(
-        ctx, 
-        cardInfo.company, 
-        tempWidth / 2, 
-        currentY, 
-        maxWidth, 
-        fontSize, 
-        fontFamily, 
+        ctx,
+        cardInfo.company,
+        logicalTempWidth / 2,
+        currentY,
+        maxWidth,
+        fontSize,
+        fontFamily,
         'center'
       );
 
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'company'});
-      currentY += actualHeight * 1.3;
+      const step = actualHeight * baseLineGapCompany;
+      elementPositions.push({ start: startY, end: startY + step, type: 'company' });
+      currentY += step + lineSpace;
     }
-  
+
     // キャッチフレーズ
     if (cardInfo.tagline) {
       const fontSize = this.calculateFontSize(0.035, canvasHeight, 16);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.tagline);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
+
       ctx.textBaseline = 'top';
       const { actualHeight } = this.drawTextFitToWidth(
-        ctx, 
-        cardInfo.tagline, 
-        tempWidth / 2, 
-        currentY, 
-        maxWidth, 
-        fontSize, 
-        fontFamily, 
+        ctx,
+        cardInfo.tagline,
+        logicalTempWidth / 2,
+        currentY,
+        maxWidth,
+        fontSize,
+        fontFamily,
         'center'
       );
-      
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'tagline'});
-      currentY += actualHeight * 2;
+
+      const step = actualHeight * baseLineGapTagline;
+      elementPositions.push({ start: startY, end: startY + step, type: 'tagline' });
+      currentY += step + lineSpace;
     }
-  
+
     // 名前（自国語）
     if (cardInfo.name) {
       const fontSize = this.calculateFontSize(0.110, canvasHeight, 16);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.name);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
+
       ctx.textBaseline = 'top';
       const { actualHeight } = this.drawTextFitToWidth(
-        ctx, 
-        cardInfo.name, 
-        padding, 
-        currentY, 
-        maxWidth, 
-        fontSize, 
-        fontFamily, 
+        ctx,
+        cardInfo.name,
+        padding,
+        currentY,
+        maxWidth,
+        fontSize,
+        fontFamily,
         'left'
       );
-      
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'name'});
-      currentY += actualHeight * 1.4;
+
+      const step = actualHeight * baseLineGapName;
+      elementPositions.push({ start: startY, end: startY + step, type: 'name' });
+      currentY += step + lineSpace;
     }
-  
+
     // 英語名
     if (cardInfo.nameEn) {
       const fontSize = this.calculateFontSize(0.05, canvasHeight, 16);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.nameEn);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
+
       ctx.textBaseline = 'top';
       const { actualHeight } = this.drawTextFitToWidth(
-        ctx, 
-        cardInfo.nameEn, 
-        padding, 
-        currentY, 
-        maxWidth, 
-        fontSize, 
-        fontFamily, 
+        ctx,
+        cardInfo.nameEn,
+        padding,
+        currentY,
+        maxWidth,
+        fontSize,
+        fontFamily,
         'left'
       );
-      
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'nameEn'});
-      currentY += actualHeight * 1.5;
+
+      const step = actualHeight * baseLineGapNameEn;
+      elementPositions.push({ start: startY, end: startY + step, type: 'nameEn' });
+      currentY += step + lineSpace;
     }
-  
+
     // 肩書き
     if (cardInfo.title) {
       const fontSize = this.calculateFontSize(0.048, canvasHeight, 16);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.title);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
+
       ctx.textBaseline = 'top';
       const { actualHeight } = this.drawTextFitToWidth(
-        ctx, 
-        cardInfo.title, 
-        padding, 
-        currentY, 
-        maxWidth, 
-        fontSize, 
-        fontFamily, 
+        ctx,
+        cardInfo.title,
+        padding,
+        currentY,
+        maxWidth,
+        fontSize,
+        fontFamily,
         'left'
       );
-      
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'title'});
-      currentY += actualHeight * 2;
+
+      const step = actualHeight * baseLineGapTitle;
+      elementPositions.push({ start: startY, end: startY + step, type: 'title' });
+      currentY += step + lineSpace;
     }
-  
 
     // 連絡先
-    const contactFontSize = this.calculateFontSize(0.038, canvasHeight, 16);
+    const contactFontSize = this.calculateFontSize(0.038, canvasHeight, 12);
     const labelWidthRatio = 0.15;  // ラベル幅の比率（15%）
     const gapRatio = 0.02;         // ラベルとデータの間隔（2%）
 
     [
-      { label: 'Email', data: cardInfo.email, type: 'email' },
-      { label: 'Phone', data: cardInfo.phone, type: 'phone' }, 
-      { label: 'SNS', data: cardInfo.sns, type: 'sns' },
+      { label: 'Email',   data: cardInfo.email,   type: 'email' },
+      { label: 'Phone',   data: cardInfo.phone,   type: 'phone' },
+      { label: 'SNS',     data: cardInfo.sns,     type: 'sns' },
       { label: 'Website', data: cardInfo.website, type: 'website' }
     ].forEach(item => {
-      if (item.data) {
-        const startY = currentY;
-        
-        const labelFontFamily = this.getFontFamily(item.label);
-        const dataFontFamily = this.getFontFamily(item.data);
-        
-        ctx.textBaseline = 'top';
-        
-        // 利用可能な幅を計算
-        const availableWidth = tempWidth - padding * 2;
-        const labelMaxWidth = availableWidth * labelWidthRatio;
-        const gap = availableWidth * gapRatio;
-        const dataMaxWidth = availableWidth - labelMaxWidth - gap;
-        
-        // ラベルをdrawTextFitToWidthで描画（縮小可能）
-        const { actualHeight: labelHeight } = this.drawTextFitToWidth(
-          ctx,
-          item.label,
-          padding,
-          currentY,
-          labelMaxWidth,
-          contactFontSize,
-          labelFontFamily,
-          'left'
-        );
-        
-        // データをdrawTextFitToWidthで描画（開始位置を揃える）
-        const dataStartX = padding + labelMaxWidth + gap;
-        const { actualHeight: dataHeight } = this.drawTextFitToWidth(
-          ctx,
-          item.data,
-          dataStartX,
-          currentY,
-          dataMaxWidth,
-          contactFontSize,
-          dataFontFamily,
-          'left'
-        );
-        
-        // 高い方の高さを使用
-        const actualHeight = Math.max(labelHeight, dataHeight);
-        
-        elementPositions.push({start: startY, end: startY + actualHeight, type: item.type});
-        currentY += actualHeight * 1.4;
+      if (!item.data) return;
 
-      }
+      const startY = currentY;
+
+      const labelFontFamily = this.getFontFamily(item.label);
+      const dataFontFamily = this.getFontFamily(item.data);
+
+      ctx.textBaseline = 'top';
+
+      const availableWidth = logicalTempWidth - padding * 2;
+      const labelMaxWidth = availableWidth * labelWidthRatio;
+      const gap = availableWidth * gapRatio;
+      const dataMaxWidth = availableWidth - labelMaxWidth - gap;
+
+      const { actualHeight: labelHeight } = this.drawTextFitToWidth(
+        ctx,
+        item.label,
+        padding,
+        currentY,
+        labelMaxWidth,
+        contactFontSize,
+        labelFontFamily,
+        'left'
+      );
+
+      const dataStartX = padding + labelMaxWidth + gap;
+      const { actualHeight: dataHeight } = this.drawTextFitToWidth(
+        ctx,
+        item.data,
+        dataStartX,
+        currentY,
+        dataMaxWidth,
+        contactFontSize,
+        dataFontFamily,
+        'left'
+      );
+
+      const actualHeight = Math.max(labelHeight, dataHeight);
+
+      const step = actualHeight * baseLineGapContact;
+      elementPositions.push({ start: startY, end: startY + step, type: item.type });
+      currentY += step + lineSpace;
     });
 
-  
+    // ブロック生成（論理 → 物理は generateBlocksFromCanvas 側）
     this.generateBlocksFromCanvas(
       tempCanvas,
       canvasWidth,
@@ -506,7 +525,7 @@ export class BlockManager {
         sns: this.elementColors.sns || '#F472B6',
         website: this.elementColors.website || '#FBBF24'
       },
-      1  // ←scaleFactorを1に固定
+      1
     );
   }
   
@@ -520,117 +539,130 @@ export class BlockManager {
     pixelSize: number
   ): void {
     const tempCanvas = document.createElement('canvas');
-    const ctx = tempCanvas.getContext('2d', { 
+    const ctx = tempCanvas.getContext('2d', {
       willReadFrequently: true
     });
     if (!ctx) return;
-
+  
     ctx.imageSmoothingEnabled = true;
-    
-
+  
+    // 論理ピクセルでレイアウト計算
     const padding = this.calculateCanvasSize(0.08, canvasHeight);
-    const tempWidth = this.calculateCanvasSize(0.8, canvasWidth);
-    const tempHeight = this.calculateCanvasSize(0.81, canvasHeight);
-    
-        
-    console.log('createMinimalLayout:', {
-      canvasWidth, 
-      canvasHeight, 
+    const logicalTempWidth = this.calculateCanvasSize(0.8, canvasWidth);
+    const logicalTempHeight = this.calculateCanvasSize(0.81, canvasHeight);
+  
+    console.log('createMinimalLayout (logical):', {
+      canvasWidth,
+      canvasHeight,
       padding,
-      tempWidth, 
-      tempHeight, 
+      logicalTempWidth,
+      logicalTempHeight,
       dpr: this.dpr
     });
-
-    tempCanvas.width = tempWidth;
-    tempCanvas.height = tempHeight;
+  
+    // Canvas 実体は物理解像度
+    tempCanvas.width = logicalTempWidth * this.dpr;
+    tempCanvas.height = logicalTempHeight * this.dpr;
     ctx.imageSmoothingEnabled = true;
-    
+  
     ctx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+  
+    // DPR スケールを適用して以降は論理座標
+    ctx.scale(this.dpr, this.dpr);
     ctx.fillStyle = '#FFFFFF';
-
+  
+    // 行送り用パラメータ
+    const baseLineGapName    = 1.6;
+    const baseLineGapTitle   = 2.5;
+    const baseLineGapContact = 1.6;
+    const lineSpace          = 1;   // 追加行間(px)
+  
     let currentY = padding;
-    const elementPositions: Array<{start: number, end: number, type: string}> = [];
-
+    const elementPositions: Array<{ start: number; end: number; type: string }> = [];
+  
     // 名前（中央・大きく）
     if (cardInfo.name) {
       const fontSize = this.calculateFontSize(0.120, canvasHeight, 16);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.name);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
+  
       ctx.textBaseline = 'top';
       const { actualHeight } = this.drawTextFitToWidth(
         ctx,
         cardInfo.name,
-        tempWidth / 2,
+        logicalTempWidth / 2,
         currentY,
         maxWidth,
         fontSize,
         fontFamily,
         'center'
       );
-      
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'name'});
-      currentY += actualHeight * 1.6;
+  
+      const step = actualHeight * baseLineGapName;
+      elementPositions.push({ start: startY, end: startY + step, type: 'name' });
+      currentY += step + lineSpace;
     }
-
-    // 肩書き・会社
+  
+    // 肩書き・会社（1行にまとめて中央）
     const titleText = [cardInfo.title, cardInfo.company].filter(Boolean).join(' | ');
     if (titleText) {
       const fontSize = this.calculateFontSize(0.045, canvasHeight, 16);
       const startY = currentY;
       const fontFamily = this.getFontFamily(titleText);
-      const maxWidth = tempWidth - padding * 2;
-      
+      const maxWidth = logicalTempWidth - padding * 2;
+  
       ctx.textBaseline = 'top';
-      const { actualHeight }= this.drawTextFitToWidth(
+      const { actualHeight } = this.drawTextFitToWidth(
         ctx,
         titleText,
-        tempWidth / 2,
+        logicalTempWidth / 2,
         currentY,
         maxWidth,
         fontSize,
         fontFamily,
         'center'
       );
-      
-      elementPositions.push({start: startY, end: startY + actualHeight, type: 'title'});
-      currentY += actualHeight * 2.5;
+  
+      const step = actualHeight * baseLineGapTitle;
+      elementPositions.push({ start: startY, end: startY + step, type: 'title' });
+      currentY += step + lineSpace;
     }
-
-    // 連絡先（中央・細い線）
-    const contactFontSize = this.calculateFontSize(0.035, canvasHeight, 16);
-    const maxWidth = tempWidth - padding * 2;
-    
+  
+    // 連絡先（中央）
+    const contactFontSize = this.calculateFontSize(0.035, canvasHeight, 12);
+    const contactMaxWidth = logicalTempWidth - padding * 2;
+  
     ctx.textBaseline = 'top';
-    
+  
     [
-      { data: cardInfo.email, type: 'email' },
-      { data: cardInfo.phone, type: 'phone' },
-      { data: cardInfo.sns, type: 'sns' },
+      { data: cardInfo.email,   type: 'email' },
+      { data: cardInfo.phone,   type: 'phone' },
+      { data: cardInfo.sns,     type: 'sns' },
       { data: cardInfo.website, type: 'website' }
     ].forEach(item => {
-      if (item.data) {
-        const startY = currentY;
-        const fontFamily = this.getFontFamily(item.data);
-        
-        const { actualHeight }= this.drawTextFitToWidth(
-          ctx,
-          item.data,
-          tempWidth / 2,
-          currentY,
-          maxWidth,
-          contactFontSize,
-          fontFamily,
-          'center'
-        );
-        
-        elementPositions.push({start: startY, end: startY + actualHeight, type: item.type});
-        currentY += actualHeight * 1.6;
-      }
+      if (!item.data) return;
+  
+      const startY = currentY;
+      const fontFamily = this.getFontFamily(item.data);
+  
+      const { actualHeight } = this.drawTextFitToWidth(
+        ctx,
+        item.data,
+        logicalTempWidth / 2,
+        currentY,
+        contactMaxWidth,
+        contactFontSize,
+        fontFamily,
+        'center'
+      );
+  
+      const step = actualHeight * baseLineGapContact;
+      elementPositions.push({ start: startY, end: startY + step, type: item.type });
+      currentY += step + lineSpace;
     });
-
+  
+    // ブロック生成
     this.generateBlocksFromCanvas(
       tempCanvas,
       canvasWidth,
@@ -645,12 +677,10 @@ export class BlockManager {
         sns: this.elementColors.sns || '#F472B6',
         website: this.elementColors.website || '#FBBF24'
       },
-      1 // scaleFactor = 1
+      1
     );
   }
-
-
-
+  
   /**
    * 名刺情報からピクセル単位のブロックを生成（レイアウト選択可能）
    */
@@ -678,108 +708,90 @@ export class BlockManager {
   }
 
 
-  /**
-   * キャンバスからブロックを生成
-   */
-  private generateBlocksFromCanvas(
-    tempCanvas: HTMLCanvasElement,  // 832×456（物理ピクセル、DPR=3倍）
-    canvasWidth: number,      // CSS論理ピクセル 328
-    canvasHeight: number,     // CSS論理ピクセル 192
-    pixelSize: number,        // スキャン間隔
-    elementPositions: Array<{start: number, end: number, type: string}>,
-    colorMap: { [key: string]: string },
-    scaleFactor: number = 1 // ブロックサイズ
-  ): void {
-    const ctx = tempCanvas.getContext('2d');
-    if (!ctx) return;
-  
-    const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-    const pixels = imageData.data;
+/**
+ * キャンバスからブロックを生成
+ * tempCanvas: 物理ピクセル（logicalWidth * dpr, logicalHeight * dpr）
+ * canvasWidth/Height: ゲーム側キャンバス（論理）
+ * logicalTempWidth/Height: レイアウトに使った論理キャンバスサイズ
+ */
+private generateBlocksFromCanvas(
+  tempCanvas: HTMLCanvasElement,
+  canvasWidth: number,
+  canvasHeight: number,
+  pixelSize: number,
+  elementPositions: Array<{ start: number; end: number; type: string }>,
+  colorMap: { [key: string]: string },
+  scaleFactor: number = 1
+): void {
+  const ctx = tempCanvas.getContext('2d');
+  if (!ctx) return;
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ステップ1: DPRで割り戻すスケールファクター
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    const dprScale = 1 / this.dpr;
-  
-    console.log('generateBlocksFromCanvas:', {
-      tempCanvasSize: `${tempCanvas.width}x${tempCanvas.height}`,
-      gameCanvasSize: `${canvasWidth}x${canvasHeight}`,
-      dpr: this.dpr,
-      dprScale: dprScale
-    });
-  
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ステップ2: 論理座標系でのtempCanvasサイズ
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    const logicalTempWidth = tempCanvas.width * dprScale;   // 832 / 3 = 277
-    const logicalTempHeight = tempCanvas.height * dprScale; // 456 / 3 = 152
-  
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ステップ3: 中央配置の計算（論理座標系）
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    const startX = (canvasWidth - logicalTempWidth) / 2;   // (328 - 277) / 2 = 25.5
-    const startY = (canvasHeight - logicalTempHeight) / 2; // (192 - 152) / 2 = 20
-  
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ステップ4: 色の取得関数（物理座標系で動作）
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    const getColorForY = (physicalY: number): string => {
-      // elementPositionsも物理ピクセルで保存されているため、そのまま使える
-      for (const pos of elementPositions) {
-        if (physicalY >= pos.start && physicalY <= pos.end) {
-          return colorMap[pos.type] || '#FFFFFF';
-        }
-      }
-      
-      // 最も近い要素の色を返す
-      const closestPos = elementPositions.reduce((closest, pos) => {
-        const center = (pos.start + pos.end) / 2;
-        const distance = Math.abs(physicalY - center);
-        const closestCenter = (closest.start + closest.end) / 2;
-        const closestDistance = Math.abs(physicalY - closestCenter);
-        return distance < closestDistance ? pos : closest;
-      }, elementPositions[0]);
-      
-      return colorMap[closestPos?.type] || '#FFFFFF';
-    };
+  const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+  const pixels = imageData.data;
 
+  const dprScale = 1 / this.dpr;
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ステップ5: ピクセルスキャン（物理ピクセル座標）
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    const scanStep = pixelSize; // 基本は1ピクセルずつスキャン（高精細）
-    //const blockSize = scaleFactor * dprScale;  // 論理座標系でのブロックサイズ（1/3 ≈ 0.33）
-    const blockSize = scaleFactor //常に1
+  // tempCanvas は「論理 * dpr」で作られている前提
+  const logicalTempWidth = tempCanvas.width * dprScale;
+  const logicalTempHeight = tempCanvas.height * dprScale;
 
-    for (let physicalY = 0; physicalY < tempCanvas.height; physicalY += scanStep) {
-      for (let physicalX = 0; physicalX < tempCanvas.width; physicalX += scanStep) {
-        const i = (physicalY * tempCanvas.width + physicalX) * 4;
-        
-        // アルファ値が200以上なら描画されているピクセル
-        if (pixels[i + 3] > 80) {
-          // ← 重要：物理座標を論理座標に変換
-          const logicalX = physicalX * dprScale;
-          const logicalY = physicalY * dprScale;
-          
-          this.blocks.push({
-            x: Math.round(startX + logicalX),  // ← 整数化
-            y: Math.round(startY + logicalY),  // ← 整数化
-            width: blockSize,      // 論理座標系のサイズ（0.33）
-            height: blockSize,
-            text: '',
-            isDestroyed: false,
-            destroyedAt: 0,
-            color: getColorForY(physicalY),
-            fontSize: 0,
-            fontFamily: ''
-          });
-        }
+  const startX = (canvasWidth - logicalTempWidth) / 2;
+  const startY = (canvasHeight - logicalTempHeight) / 2;
+
+  // elementPositions は「論理Y」で保存している前提に変更する
+  const getColorForLogicalY = (logicalY: number): string => {
+    for (const pos of elementPositions) {
+      if (logicalY >= pos.start && logicalY <= pos.end) {
+        return colorMap[pos.type] || '#FFFFFF';
       }
     }
+    if (elementPositions.length === 0) return '#FFFFFF';
 
-    console.log(`Generated ${this.blocks.length} blocks`);
+    const closestPos = elementPositions.reduce((closest, pos) => {
+      const center = (pos.start + pos.end) / 2;
+      const distance = Math.abs(logicalY - center);
+      const closestCenter = (closest.start + closest.end) / 2;
+      const closestDistance = Math.abs(logicalY - closestCenter);
+      return distance < closestDistance ? pos : closest;
+    }, elementPositions[0]);
+
+    return colorMap[closestPos?.type] || '#FFFFFF';
+  };
+
+  const scanStep = pixelSize;
+  const blockSize = scaleFactor; // 論理座標系でのブロックサイズ（ゲーム内）
+
+  for (let physicalY = 0; physicalY < tempCanvas.height; physicalY += scanStep) {
+    // 物理 → 論理Y
+    const logicalY = physicalY * dprScale;
+    const color = getColorForLogicalY(logicalY);
+
+    for (let physicalX = 0; physicalX < tempCanvas.width; physicalX += scanStep) {
+      const i = (physicalY * tempCanvas.width + physicalX) * 4;
+
+      if (pixels[i + 3] > 80) {
+        const logicalX = physicalX * dprScale;
+
+        this.blocks.push({
+          x: Math.round(startX + logicalX),
+          y: Math.round(startY + logicalY),
+          width: blockSize,
+          height: blockSize,
+          text: '',
+          isDestroyed: false,
+          destroyedAt: 0,
+          color,
+          fontSize: 0,
+          fontFamily: ''
+        });
+      }
+    }
   }
-  
+
+  console.log(`Generated ${this.blocks.length} blocks`);
+}
+
+
   // 以下、既存のメソッド（変更なし）
   destroyBlock(index: number, currentTime: number): boolean {
     if (index >= 0 && index < this.blocks.length && !this.blocks[index].isDestroyed) {

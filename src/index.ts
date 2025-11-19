@@ -31,7 +31,7 @@ export function initializeGame(
   // ステップ1: コンテナサイズを取得（CSS論理ピクセル）
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const businessCardRatio = 91 / 55;
-  const minWidth = 320;
+  const minWidth = 300;
   const maxWidth = 910;
 
   // 1. container の clientWidth を取得。設定されていない場合は600をデフォルトとする。

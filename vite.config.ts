@@ -8,6 +8,7 @@ export default defineConfig(({ command, mode }) => {
     return {
       root: 'examples',
       server: {
+        host: true,
         port: 5173,
         open: true
       }
