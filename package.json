@@ -1,6 +1,6 @@
 {
   "name": "business-card-breakout",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "An embeddable library that transforms business card designs into a breakout game with physics, effects, and time-based block recovery",
   "type": "module",
   "main": "./dist/index.umd.js",

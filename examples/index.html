@@ -287,7 +287,10 @@
         </div>
       </div>
       
-      <button class="btn-primary" onclick="startGame()">START GAME</button>
+      <div class="button-group">
+        <button class="btn-primary" onclick="startGame()">START GAME</button>
+        <button class="btn-secondary" onclick="shareBusinessCard()">SHARE CARD</button>
+      </div>
 
       <div id="gameContainer"></div>
     </div>
@@ -309,6 +312,20 @@
     import { DEFAULT_BUSINESS_CARD, DEFAULT_GAME_CONFIG, DEFAULT_LAYOUT } from '../src/config.ts';
 
     let gameEngine = null;
+
+    const CARD_FIELD_TO_INPUT_ID = {
+      name: 'nameInput',
+      nameEn: 'nameEnInput',
+      title: 'titleInput',
+      tagline: 'taglineInput',
+      company: 'companyInput',
+      email: 'emailInput',
+      phone: 'phoneInput',
+      sns: 'snsInput',
+      website: 'websiteInput',
+    };
+
+    const SUPPORTED_LAYOUTS = ['standard', 'professional', 'minimal'];
 
     /**
      * デフォルト値をフォームに設定
@@ -364,9 +381,100 @@
       initializeAndStartGame(businessCardInfo, layout);
     };
 
+    const applySharedParamsToForm = () => {
+      const params = new URLSearchParams(window.location.search);
+      let applied = false;
+
+      Object.entries(CARD_FIELD_TO_INPUT_ID).forEach(([field, inputId]) => {
+        if (!params.has(field)) {
+          return;
+        }
+        const element = document.getElementById(inputId);
+        if (element) {
+          element.value = params.get(field) || '';
+          applied = true;
+        }
+      });
+
+      const layoutParam = params.get('layout');
+      if (layoutParam && SUPPORTED_LAYOUTS.includes(layoutParam)) {
+        document.getElementById('layoutSelect').value = layoutParam;
+        applied = true;
+      }
+
+      return applied;
+    };
+
+    const createShareUrl = (businessCardInfo, layout) => {
+      const params = new URLSearchParams();
+      Object.entries(businessCardInfo).forEach(([key, value]) => {
+        if (typeof value === 'string' && value.trim().length > 0) {
+          params.set(key, value.trim());
+        }
+      });
+      if (layout) {
+        params.set('layout', layout);
+      }
+
+      const url = new URL(window.location.href);
+      url.search = params.toString();
+      url.hash = '';
+      return url.toString();
+    };
+
+    const copyToClipboardFallback = (text) => {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.top = '-1000px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    };
+
+    window.shareBusinessCard = async function () {
+      const businessCardInfo = readBusinessCardInfo();
+      const layout = document.getElementById('layoutSelect').value;
+      const shareUrl = createShareUrl(businessCardInfo, layout);
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Business Card Breakout',
+            text: '名刺ゲームを共有しました！',
+            url: shareUrl,
+          });
+          return;
+        } catch (error) {
+          if (error.name === 'AbortError') {
+            return;
+          }
+          console.warn('Web Share API failed, fallback to clipboard.', error);
+        }
+      }
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(shareUrl);
+        } else {
+          copyToClipboardFallback(shareUrl);
+        }
+        alert('共有リンクをクリップボードにコピーしました！');
+      } catch (error) {
+        console.warn('Clipboard API failed, fallback to alert.', error);
+        alert(`共有リンクをコピーできませんでした。\n${shareUrl}`);
+      }
+    };
+
     // ページ読み込み時にデフォルト値を設定してゲーム開始
     window.addEventListener('load', () => {
       setDefaultValues();
+      applySharedParamsToForm();
       const businessCardInfo = readBusinessCardInfo();
       const layout = document.getElementById('layoutSelect').value;
       initializeAndStartGame(businessCardInfo, layout);
