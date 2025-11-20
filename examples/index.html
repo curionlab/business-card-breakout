@@ -471,10 +471,12 @@
       }
     };
 
-    // ページ読み込み時にデフォルト値を設定してゲーム開始
+    // ページ読み込み時にURLパラメータを優先し、なければデフォルト値を設定
     window.addEventListener('load', () => {
-      setDefaultValues();
-      applySharedParamsToForm();
+      const hasSharedParams = applySharedParamsToForm();
+      if (!hasSharedParams) {
+        setDefaultValues();
+      }
       const businessCardInfo = readBusinessCardInfo();
       const layout = document.getElementById('layoutSelect').value;
       initializeAndStartGame(businessCardInfo, layout);

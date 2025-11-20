@@ -322,10 +322,10 @@ export class BlockManager {
 
     // 行送り用パラメータ
     const baseLineGapCompany   = 1.3;
-    const baseLineGapTagline   = 2.0;
+    const baseLineGapTagline   = 1.7;
     const baseLineGapName      = 1.4;
     const baseLineGapNameEn    = 1.5;
-    const baseLineGapTitle     = 2.0;
+    const baseLineGapTitle     = 1.8;
     const baseLineGapContact   = 1.4;
     const lineSpace            = 1;   // 追加の1px行間
 
@@ -358,7 +358,7 @@ export class BlockManager {
 
     // キャッチフレーズ
     if (cardInfo.tagline) {
-      const fontSize = this.calculateFontSize(0.035, canvasHeight, 16);
+      const fontSize = this.calculateFontSize(0.035, canvasHeight, 12);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.tagline);
       const maxWidth = logicalTempWidth - padding * 2;
@@ -382,7 +382,7 @@ export class BlockManager {
 
     // 名前（自国語）
     if (cardInfo.name) {
-      const fontSize = this.calculateFontSize(0.110, canvasHeight, 16);
+      const fontSize = this.calculateFontSize(0.110, canvasHeight, 12);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.name);
       const maxWidth = logicalTempWidth - padding * 2;
@@ -406,7 +406,7 @@ export class BlockManager {
 
     // 英語名
     if (cardInfo.nameEn) {
-      const fontSize = this.calculateFontSize(0.05, canvasHeight, 16);
+      const fontSize = this.calculateFontSize(0.05, canvasHeight, 10);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.nameEn);
       const maxWidth = logicalTempWidth - padding * 2;
@@ -430,7 +430,7 @@ export class BlockManager {
 
     // 肩書き
     if (cardInfo.title) {
-      const fontSize = this.calculateFontSize(0.048, canvasHeight, 16);
+      const fontSize = this.calculateFontSize(0.048, canvasHeight, 12);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.title);
       const maxWidth = logicalTempWidth - padding * 2;
@@ -453,7 +453,7 @@ export class BlockManager {
     }
 
     // 連絡先
-    const contactFontSize = this.calculateFontSize(0.038, canvasHeight, 12);
+    const contactFontSize = this.calculateFontSize(0.038, canvasHeight, 10);
     const labelWidthRatio = 0.15;  // ラベル幅の比率（15%）
     const gapRatio = 0.02;         // ラベルとデータの間隔（2%）
 
@@ -708,88 +708,88 @@ export class BlockManager {
   }
 
 
-/**
- * キャンバスからブロックを生成
- * tempCanvas: 物理ピクセル（logicalWidth * dpr, logicalHeight * dpr）
- * canvasWidth/Height: ゲーム側キャンバス（論理）
- * logicalTempWidth/Height: レイアウトに使った論理キャンバスサイズ
- */
-private generateBlocksFromCanvas(
-  tempCanvas: HTMLCanvasElement,
-  canvasWidth: number,
-  canvasHeight: number,
-  pixelSize: number,
-  elementPositions: Array<{ start: number; end: number; type: string }>,
-  colorMap: { [key: string]: string },
-  scaleFactor: number = 1
-): void {
-  const ctx = tempCanvas.getContext('2d');
-  if (!ctx) return;
+  /**
+   * キャンバスからブロックを生成
+   * tempCanvas: 物理ピクセル（logicalWidth * dpr, logicalHeight * dpr）
+   * canvasWidth/Height: ゲーム側キャンバス（論理）
+   * logicalTempWidth/Height: レイアウトに使った論理キャンバスサイズ
+   */
+  private generateBlocksFromCanvas(
+    tempCanvas: HTMLCanvasElement,
+    canvasWidth: number,
+    canvasHeight: number,
+    pixelSize: number,
+    elementPositions: Array<{ start: number; end: number; type: string }>,
+    colorMap: { [key: string]: string },
+    scaleFactor: number = 1
+  ): void {
+    const ctx = tempCanvas.getContext('2d');
+    if (!ctx) return;
 
-  const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-  const pixels = imageData.data;
+    const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+    const pixels = imageData.data;
 
-  const dprScale = 1 / this.dpr;
+    const dprScale = 1 / this.dpr;
 
-  // tempCanvas は「論理 * dpr」で作られている前提
-  const logicalTempWidth = tempCanvas.width * dprScale;
-  const logicalTempHeight = tempCanvas.height * dprScale;
+    // tempCanvas は「論理 * dpr」で作られている前提
+    const logicalTempWidth = tempCanvas.width * dprScale;
+    const logicalTempHeight = tempCanvas.height * dprScale;
 
-  const startX = (canvasWidth - logicalTempWidth) / 2;
-  const startY = (canvasHeight - logicalTempHeight) / 2;
+    const startX = (canvasWidth - logicalTempWidth) / 2;
+    const startY = (canvasHeight - logicalTempHeight) / 2;
 
-  // elementPositions は「論理Y」で保存している前提に変更する
-  const getColorForLogicalY = (logicalY: number): string => {
-    for (const pos of elementPositions) {
-      if (logicalY >= pos.start && logicalY <= pos.end) {
-        return colorMap[pos.type] || '#FFFFFF';
+    // elementPositions は「論理Y」で保存している前提に変更する
+    const getColorForLogicalY = (logicalY: number): string => {
+      for (const pos of elementPositions) {
+        if (logicalY >= pos.start && logicalY <= pos.end) {
+          return colorMap[pos.type] || '#FFFFFF';
+        }
+      }
+      if (elementPositions.length === 0) return '#FFFFFF';
+
+      const closestPos = elementPositions.reduce((closest, pos) => {
+        const center = (pos.start + pos.end) / 2;
+        const distance = Math.abs(logicalY - center);
+        const closestCenter = (closest.start + closest.end) / 2;
+        const closestDistance = Math.abs(logicalY - closestCenter);
+        return distance < closestDistance ? pos : closest;
+      }, elementPositions[0]);
+
+      return colorMap[closestPos?.type] || '#FFFFFF';
+    };
+
+    const scanStep = pixelSize;
+    const blockSize = scaleFactor; // 論理座標系でのブロックサイズ（ゲーム内）
+
+    for (let physicalY = 0; physicalY < tempCanvas.height; physicalY += scanStep) {
+      // 物理 → 論理Y
+      const logicalY = physicalY * dprScale;
+      const color = getColorForLogicalY(logicalY);
+
+      for (let physicalX = 0; physicalX < tempCanvas.width; physicalX += scanStep) {
+        const i = (physicalY * tempCanvas.width + physicalX) * 4;
+
+        if (pixels[i + 3] > 80) {
+          const logicalX = physicalX * dprScale;
+
+          this.blocks.push({
+            x: Math.round(startX + logicalX),
+            y: Math.round(startY + logicalY),
+            width: blockSize,
+            height: blockSize,
+            text: '',
+            isDestroyed: false,
+            destroyedAt: 0,
+            color,
+            fontSize: 0,
+            fontFamily: ''
+          });
+        }
       }
     }
-    if (elementPositions.length === 0) return '#FFFFFF';
 
-    const closestPos = elementPositions.reduce((closest, pos) => {
-      const center = (pos.start + pos.end) / 2;
-      const distance = Math.abs(logicalY - center);
-      const closestCenter = (closest.start + closest.end) / 2;
-      const closestDistance = Math.abs(logicalY - closestCenter);
-      return distance < closestDistance ? pos : closest;
-    }, elementPositions[0]);
-
-    return colorMap[closestPos?.type] || '#FFFFFF';
-  };
-
-  const scanStep = pixelSize;
-  const blockSize = scaleFactor; // 論理座標系でのブロックサイズ（ゲーム内）
-
-  for (let physicalY = 0; physicalY < tempCanvas.height; physicalY += scanStep) {
-    // 物理 → 論理Y
-    const logicalY = physicalY * dprScale;
-    const color = getColorForLogicalY(logicalY);
-
-    for (let physicalX = 0; physicalX < tempCanvas.width; physicalX += scanStep) {
-      const i = (physicalY * tempCanvas.width + physicalX) * 4;
-
-      if (pixels[i + 3] > 80) {
-        const logicalX = physicalX * dprScale;
-
-        this.blocks.push({
-          x: Math.round(startX + logicalX),
-          y: Math.round(startY + logicalY),
-          width: blockSize,
-          height: blockSize,
-          text: '',
-          isDestroyed: false,
-          destroyedAt: 0,
-          color,
-          fontSize: 0,
-          fontFamily: ''
-        });
-      }
-    }
+    console.log(`Generated ${this.blocks.length} blocks`);
   }
-
-  console.log(`Generated ${this.blocks.length} blocks`);
-}
 
 
   // 以下、既存のメソッド（変更なし）
