@@ -133,10 +133,10 @@ export class BlockManager {
     });
 
     // Canvas実体は物理解像度
-    tempCanvas.width = logicalTempWidth * this.dpr;
-    tempCanvas.height = logicalTempHeight * this.dpr;
+    tempCanvas.width = Math.round(logicalTempWidth * this.dpr);
+    tempCanvas.height = Math.round(logicalTempHeight * this.dpr);
 
-    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
 
     // DPRスケール適用（以降は論理座標）
@@ -293,10 +293,10 @@ export class BlockManager {
     });
     if (!ctx) return;
 
-    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingEnabled = false;
 
     // 論理ピクセルでレイアウト計算
-    const padding = this.calculateCanvasSize(0.08, canvasHeight);
+    const padding = this.calculateCanvasSize(0.02, canvasHeight);
     const logicalTempWidth = this.calculateCanvasSize(0.85, canvasWidth);
     const logicalTempHeight = this.calculateCanvasSize(0.81, canvasHeight);
 
@@ -313,7 +313,7 @@ export class BlockManager {
     tempCanvas.width = logicalTempWidth * this.dpr;
     tempCanvas.height = logicalTempHeight * this.dpr;
 
-    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
 
     // DPR スケールを適用して以降は論理座標で描画
@@ -322,9 +322,9 @@ export class BlockManager {
 
     // 行送り用パラメータ
     const baseLineGapCompany   = 1.3;
-    const baseLineGapTagline   = 1.7;
-    const baseLineGapName      = 1.4;
-    const baseLineGapNameEn    = 1.5;
+    const baseLineGapTagline   = 1.9;
+    const baseLineGapName      = 1.35;
+    const baseLineGapNameEn    = 1.4;
     const baseLineGapTitle     = 1.8;
     const baseLineGapContact   = 1.4;
     const lineSpace            = 1;   // 追加の1px行間
@@ -334,7 +334,7 @@ export class BlockManager {
 
     // 会社名（中央）
     if (cardInfo.company) {
-      const fontSize = this.calculateFontSize(0.08, canvasHeight, 12);
+      const fontSize = this.calculateFontSize(0.09, canvasHeight, 12);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.company);
       const maxWidth = logicalTempWidth - padding * 2;
@@ -358,7 +358,7 @@ export class BlockManager {
 
     // キャッチフレーズ
     if (cardInfo.tagline) {
-      const fontSize = this.calculateFontSize(0.035, canvasHeight, 12);
+      const fontSize = this.calculateFontSize(0.04, canvasHeight, 10);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.tagline);
       const maxWidth = logicalTempWidth - padding * 2;
@@ -382,7 +382,7 @@ export class BlockManager {
 
     // 名前（自国語）
     if (cardInfo.name) {
-      const fontSize = this.calculateFontSize(0.110, canvasHeight, 12);
+      const fontSize = this.calculateFontSize(0.120, canvasHeight, 12);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.name);
       const maxWidth = logicalTempWidth - padding * 2;
@@ -425,12 +425,12 @@ export class BlockManager {
 
       const step = actualHeight * baseLineGapNameEn;
       elementPositions.push({ start: startY, end: startY + step, type: 'nameEn' });
-      currentY += step + lineSpace;
+      currentY += step + lineSpace*12;
     }
 
     // 肩書き
     if (cardInfo.title) {
-      const fontSize = this.calculateFontSize(0.048, canvasHeight, 12);
+      const fontSize = this.calculateFontSize(0.052, canvasHeight, 12);
       const startY = currentY;
       const fontFamily = this.getFontFamily(cardInfo.title);
       const maxWidth = logicalTempWidth - padding * 2;
@@ -453,9 +453,9 @@ export class BlockManager {
     }
 
     // 連絡先
-    const contactFontSize = this.calculateFontSize(0.038, canvasHeight, 10);
-    const labelWidthRatio = 0.15;  // ラベル幅の比率（15%）
-    const gapRatio = 0.02;         // ラベルとデータの間隔（2%）
+    const contactFontSize = this.calculateFontSize(0.04, canvasHeight, 10);
+    const labelWidthRatio = 0.17;  // ラベル幅の比率（15%）
+    const gapRatio = 0.01;         // ラベルとデータの間隔（2%）
 
     [
       { label: 'Email',   data: cardInfo.email,   type: 'email' },
@@ -544,7 +544,7 @@ export class BlockManager {
     });
     if (!ctx) return;
   
-    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingEnabled = false;
   
     // 論理ピクセルでレイアウト計算
     const padding = this.calculateCanvasSize(0.08, canvasHeight);
@@ -563,7 +563,7 @@ export class BlockManager {
     // Canvas 実体は物理解像度
     tempCanvas.width = logicalTempWidth * this.dpr;
     tempCanvas.height = logicalTempHeight * this.dpr;
-    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingEnabled = false;
   
     ctx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
   
@@ -709,11 +709,11 @@ export class BlockManager {
 
 
   /**
-   * キャンバスからブロックを生成
-   * tempCanvas: 物理ピクセル（logicalWidth * dpr, logicalHeight * dpr）
-   * canvasWidth/Height: ゲーム側キャンバス（論理）
-   * logicalTempWidth/Height: レイアウトに使った論理キャンバスサイズ
-   */
+ * キャンバスからブロックを生成
+ * tempCanvas: 物理ピクセル（logicalWidth * dpr, logicalHeight * dpr）
+ * canvasWidth/Height: ゲーム側キャンバス（論理）
+ * logicalTempWidth/Height: レイアウトに使った論理キャンバスサイズ
+ */
   private generateBlocksFromCanvas(
     tempCanvas: HTMLCanvasElement,
     canvasWidth: number,
@@ -723,22 +723,19 @@ export class BlockManager {
     colorMap: { [key: string]: string },
     scaleFactor: number = 1
   ): void {
-    const ctx = tempCanvas.getContext('2d');
+    const ctx = tempCanvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
     const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
     const pixels = imageData.data;
 
     const dprScale = 1 / this.dpr;
-
-    // tempCanvas は「論理 * dpr」で作られている前提
     const logicalTempWidth = tempCanvas.width * dprScale;
     const logicalTempHeight = tempCanvas.height * dprScale;
 
     const startX = (canvasWidth - logicalTempWidth) / 2;
     const startY = (canvasHeight - logicalTempHeight) / 2;
 
-    // elementPositions は「論理Y」で保存している前提に変更する
     const getColorForLogicalY = (logicalY: number): string => {
       for (const pos of elementPositions) {
         if (logicalY >= pos.start && logicalY <= pos.end) {
@@ -758,23 +755,43 @@ export class BlockManager {
       return colorMap[closestPos?.type] || '#FFFFFF';
     };
 
-    const scanStep = pixelSize;
-    const blockSize = scaleFactor; // 論理座標系でのブロックサイズ（ゲーム内）
+    const scanStep = Math.max(1, Math.round(pixelSize * this.dpr));
+    const blockSize = scaleFactor;
+    
+    // 閾値は固定（薄いピクセルのみ除外）
+    const threshold = 20;
+
+    // 重複防止用のSet（座標をキーにする）
+    const blockSet = new Set<string>();
 
     for (let physicalY = 0; physicalY < tempCanvas.height; physicalY += scanStep) {
-      // 物理 → 論理Y
       const logicalY = physicalY * dprScale;
       const color = getColorForLogicalY(logicalY);
 
       for (let physicalX = 0; physicalX < tempCanvas.width; physicalX += scanStep) {
-        const i = (physicalY * tempCanvas.width + physicalX) * 4;
+        
+        // scanStep範囲の中心ピクセルのみ判定（高速＆正確）
+        const centerY = Math.min(physicalY + Math.floor(scanStep / 2), tempCanvas.height - 1);
+        const centerX = Math.min(physicalX + Math.floor(scanStep / 2), tempCanvas.width - 1);
+        const i = (centerY * tempCanvas.width + centerX) * 4;
 
-        if (pixels[i + 3] > 80) {
-          const logicalX = physicalX * dprScale;
+        // 低い閾値で薄いピクセルのみ除外（アンチエイリアスを除外）
+        if (pixels[i + 3] > threshold) {
+          // 論理座標を整数に丸める
+          const logicalX = Math.round(physicalX * dprScale);
+          
+          // ブロック座標を整数で確定
+          const blockX = Math.round(startX + logicalX);
+          const blockY = Math.round(startY + logicalY);
+          
+          // 重複チェック（同じ座標には1つだけ）
+          const key = `${blockX},${blockY}`;
+          if (blockSet.has(key)) continue;
+          blockSet.add(key);
 
           this.blocks.push({
-            x: Math.round(startX + logicalX),
-            y: Math.round(startY + logicalY),
+            x: blockX,
+            y: blockY,
             width: blockSize,
             height: blockSize,
             text: '',
@@ -790,6 +807,7 @@ export class BlockManager {
 
     console.log(`Generated ${this.blocks.length} blocks`);
   }
+  
 
 
   // 以下、既存のメソッド（変更なし）
