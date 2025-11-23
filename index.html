@@ -357,9 +357,19 @@
     }
 
   </style>
-  <script type="module" crossorigin src="/business-card-breakout/assets/index-8ex1kNTd.js"></script>
+  <script type="module" crossorigin src="/business-card-breakout/assets/index-DJ7iGHGO.js"></script>
 </head>
 <body>
+  <!-- 【追加】URLパラメータを即座に判定してクラスを付与（描画前） -->
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      // 'd'（圧縮）または従来のパラメータが存在するか確認
+      if (params.has('d') || params.has('name') || params.has('title') || params.has('company')) {
+        document.body.classList.add('shared-mode');
+      }
+    })();
+  </script>
   <div class="container">
     <header>
       <h1>🎮 Business Card Breakout</h1>
