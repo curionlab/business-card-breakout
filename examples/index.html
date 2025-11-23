@@ -637,35 +637,44 @@
       const businessCardInfo = readBusinessCardInfo();
       const layout = document.getElementById('layoutSelect').value;
       const shareUrl = createShareUrl(businessCardInfo, layout);
+      
+      const shareTitle = 'Business Card Breakout';
+      const shareMessage = 'Please play my business card!'; // URLを含まない純粋なメッセージ
 
+      // 1. モバイル/対応ブラウザの共有メニュー (Web Share API)
       if (navigator.share) {
         try {
           await navigator.share({
-            title: 'Business Card Breakout',
-            text: '名刺ゲームを共有しました！',
-            url: shareUrl,
+            title: shareTitle,
+            text: shareMessage, // ここにはURLを含めない
+            url: shareUrl,      // URLはここで渡す（iOSでリンクとして認識させるため）
           });
           return;
         } catch (error) {
           if (error.name === 'AbortError') {
-            return;
+            return; 
           }
           console.warn('Web Share API failed, fallback to clipboard.', error);
         }
       }
 
+      // 2. クリップボードへのコピー (フォールバック & PC)
       try {
+        // クリップボードには URL を含めたテキストをコピーする
+        const textToCopy = shareUrl;
+
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(shareUrl);
+          await navigator.clipboard.writeText(textToCopy);
         } else {
-          copyToClipboardFallback(shareUrl);
+          copyToClipboardFallback(textToCopy);
         }
         alert('共有リンクをクリップボードにコピーしました！');
       } catch (error) {
         console.warn('Clipboard API failed, fallback to alert.', error);
-        alert(`共有リンクをコピーできませんでした。\n${shareUrl}`);
+        alert(`コピーできませんでした。\n${shareUrl}`);
       }
     };
+
 
 
     // 編集モードへ切り替え（共有モード解除）：未使用
