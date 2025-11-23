@@ -359,6 +359,16 @@
   </style>
 </head>
 <body>
+  <!-- 【追加】URLパラメータを即座に判定してクラスを付与（描画前） -->
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      // 'd'（圧縮）または従来のパラメータが存在するか確認
+      if (params.has('d') || params.has('name') || params.has('title') || params.has('company')) {
+        document.body.classList.add('shared-mode');
+      }
+    })();
+  </script>
   <div class="container">
     <header>
       <h1>🎮 Business Card Breakout</h1>
@@ -657,41 +667,22 @@
       }
     };
 
-    // ページ読み込み時にURLパラメータを優先し、なければデフォルト値を設定
-    window.addEventListener('load', () => {
+
+    // 編集モードへ切り替え（共有モード解除）：未使用
+    //window.enableEditMode = function() {
+    //  document.body.classList.remove('shared-mode');
+    //  // フォーム部分へスクロール
+    //  document.querySelector('.game-section').scrollIntoView({ behavior: 'smooth' });
+    //};
+
+    // ページ読み込み時にURLパラメータを優先
+    window.addEventListener('load', async () => {
       const hasSharedParams = applySharedParamsToForm();
       
       if (hasSharedParams) {
-        // URLパラメータがある場合、共有モードとして表示を変更
-        document.body.classList.add('shared-mode');
-      } else {
-        // パラメータがない場合はデフォルト値をセット
-        setDefaultValues();
-      }
-
-      const businessCardInfo = readBusinessCardInfo();
-      const layout = document.getElementById('layoutSelect').value;
-      initializeAndStartGame(businessCardInfo, layout);
-    });
-    // ... 既存のスクリプト ...
-
-    // 編集モードへ切り替え（共有モード解除）
-    window.enableEditMode = function() {
-      document.body.classList.remove('shared-mode');
-      // フォーム部分へスクロール
-      document.querySelector('.game-section').scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.addEventListener('load', () => {
-      const hasSharedParams = applySharedParamsToForm();
-      
-      if (hasSharedParams) {
-        document.body.classList.add('shared-mode');
-        
-        // 【改善】タブのタイトルを動的に変更（名前があれば）
         const nameVal = document.getElementById('nameInput').value;
         if (nameVal) {
-          document.title = `${nameVal}'s Business Card - Breakout Game`;
+          document.title = `${nameVal} - Business Card Breakout`;
         }
       } else {
         setDefaultValues();
@@ -699,6 +690,39 @@
 
       const businessCardInfo = readBusinessCardInfo();
       const layout = document.getElementById('layoutSelect').value;
+
+      // 【修正】指定された全フォントのロードを待機（タイムアウト1秒）
+      try {
+        // CSSで指定されているフォントファミリーのリスト
+        const fontFamilies = [
+          'Bitcount Prop Single',
+          'DotGothic16',
+          'Press Start 2P',
+          'ZCOOL QingKe HuangYou',
+          'Noto Sans Thai',
+          'Noto Sans Arabic',
+          'Noto Sans KR'
+        ];
+
+        // 各フォントのロード処理をPromise配列にする
+        const fontLoadPromises = fontFamilies.map(font => 
+          document.fonts.load(`16px "${font}"`)
+        );
+
+        // すべてのフォントロードを待つPromise
+        const allFontsLoaded = Promise.all(fontLoadPromises);
+        
+        // 1秒のタイムアウトPromise
+        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 1000));
+
+        // 「全フォントロード完了」か「1秒経過」の早い方を待つ
+        await Promise.race([allFontsLoaded, timeoutPromise]);
+        
+      } catch (e) {
+        console.warn('Font loading logic failed, rendering immediately:', e);
+      }
+
+      // ゲーム初期化・開始
       initializeAndStartGame(businessCardInfo, layout);
     });
 
