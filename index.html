@@ -22,11 +22,15 @@
       color: #ffffff;
       padding: 20px;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
       max-width: 1000px;
       margin: 0 auto;
+      flex: 1;
+      width: 100%;
     }
 
     header {
@@ -162,6 +166,30 @@
       box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
     }
 
+    /* 既存のCSSの下に追加 */
+
+    /* 編集ボタンのスタイル（少し控えめなデザイン） */
+    .edit-btn {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.5);
+      color: #00D4FF;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      margin-right: 10px; /* 右隣のボタンとの間隔 */
+      transition: all 0.3s ease;
+    }
+    
+    .edit-btn:hover {
+      background: rgba(0, 212, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+
     #gameContainer {
       width: 100%;
       max-width: 910px;
@@ -201,6 +229,70 @@
       border-bottom: none;
     }
 
+    /* Shared View Mode (Hidden Elements) */
+    body.shared-mode header,
+    body.shared-mode .game-section > h2,
+    body.shared-mode .form-section,
+    body.shared-mode .button-group,
+    body.shared-mode .instructions {
+      display: none !important;
+    }
+
+    body.shared-mode .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    body.shared-mode .game-section {
+      border: none;
+      background: transparent;
+      backdrop-filter: none;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Shared Footer (Initially Hidden) */
+    .shared-footer {
+      display: none;
+      text-align: center;
+      margin-top: 30px;
+      width: 100%;
+    }
+
+    body.shared-mode .shared-footer {
+      display: block;
+    }
+
+    .create-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #00D4FF, #0099CC);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+    }
+
+    .create-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+    }
+
+    .copyright {
+      color: #b0b0b0;
+      font-size: 14px;
+    }
+
     @media (max-width: 768px) {
       .form-section {
         grid-template-columns: 1fr;
@@ -218,9 +310,34 @@
       .button-group {
         flex-direction: column;
       }
+
+    /* スマホでの共有モード時は、余白をなくして画面いっぱいに */
+    @media (max-width: 768px) {
+      body.shared-mode {
+        padding: 0; /* 全体のパディングを削除 */
+        justify-content: center; /* 垂直方向中央揃え */
+      }
+      
+      body.shared-mode .container {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      body.shared-mode #gameContainer {
+        border-radius: 0; /* 角丸をなくす */
+        border-left: none;
+        border-right: none;
+      }
+
+      body.shared-mode .shared-footer {
+        padding-bottom: 20px; /* 下部の余裕 */
+        background: #1a1a2e; /* 背景色を馴染ませる */
+      }
+    }
+
     }
   </style>
-  <script type="module" crossorigin src="/business-card-breakout/assets/index-B81x8B4P.js"></script>
+  <script type="module" crossorigin src="/business-card-breakout/assets/index-BC-WWofe.js"></script>
 </head>
 <body>
   <div class="container">
@@ -305,6 +422,14 @@
         <li>• Blocks will regenerate after 5 seconds - keep playing!</li>
         <li>• Press <strong>START GAME</strong> button to restart anytime</li>
       </ul>
+    </div>
+
+    <!-- New Shared Footer -->
+    <div class="shared-footer">
+      <!-- 編集ボタンを追加（onclickイベントを設定） -->
+      <!--<button id="editCardBtn" class="edit-btn" onclick="enableEditMode()">Edit this card</button>-->
+      <a href="." class="create-btn">CREATE NEW</a>
+      <div class="copyright">© Curion Lab</div>
     </div>
   </div>
 
