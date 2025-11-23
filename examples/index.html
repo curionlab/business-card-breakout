@@ -22,11 +22,15 @@
       color: #ffffff;
       padding: 20px;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
       max-width: 1000px;
       margin: 0 auto;
+      flex: 1;
+      width: 100%;
     }
 
     header {
@@ -162,6 +166,30 @@
       box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
     }
 
+    /* 既存のCSSの下に追加 */
+
+    /* 編集ボタンのスタイル（少し控えめなデザイン） */
+    .edit-btn {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.5);
+      color: #00D4FF;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 15px;
+      margin-right: 10px; /* 右隣のボタンとの間隔 */
+      transition: all 0.3s ease;
+    }
+    
+    .edit-btn:hover {
+      background: rgba(0, 212, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+
     #gameContainer {
       width: 100%;
       max-width: 910px;
@@ -201,6 +229,70 @@
       border-bottom: none;
     }
 
+    /* Shared View Mode (Hidden Elements) */
+    body.shared-mode header,
+    body.shared-mode .game-section > h2,
+    body.shared-mode .form-section,
+    body.shared-mode .button-group,
+    body.shared-mode .instructions {
+      display: none !important;
+    }
+
+    body.shared-mode .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    body.shared-mode .game-section {
+      border: none;
+      background: transparent;
+      backdrop-filter: none;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Shared Footer (Initially Hidden) */
+    .shared-footer {
+      display: none;
+      text-align: center;
+      margin-top: 30px;
+      width: 100%;
+    }
+
+    body.shared-mode .shared-footer {
+      display: block;
+    }
+
+    .create-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #00D4FF, #0099CC);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+    }
+
+    .create-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
+    }
+
+    .copyright {
+      color: #b0b0b0;
+      font-size: 14px;
+    }
+
     @media (max-width: 768px) {
       .form-section {
         grid-template-columns: 1fr;
@@ -218,6 +310,31 @@
       .button-group {
         flex-direction: column;
       }
+
+    /* スマホでの共有モード時は、余白をなくして画面いっぱいに */
+    @media (max-width: 768px) {
+      body.shared-mode {
+        padding: 0; /* 全体のパディングを削除 */
+        justify-content: center; /* 垂直方向中央揃え */
+      }
+      
+      body.shared-mode .container {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      body.shared-mode #gameContainer {
+        border-radius: 0; /* 角丸をなくす */
+        border-left: none;
+        border-right: none;
+      }
+
+      body.shared-mode .shared-footer {
+        padding-bottom: 20px; /* 下部の余裕 */
+        background: #1a1a2e; /* 背景色を馴染ませる */
+      }
+    }
+
     }
   </style>
 </head>
@@ -305,6 +422,14 @@
         <li>• Press <strong>START GAME</strong> button to restart anytime</li>
       </ul>
     </div>
+
+    <!-- New Shared Footer -->
+    <div class="shared-footer">
+      <!-- 編集ボタンを追加（onclickイベントを設定） -->
+      <!--<button id="editCardBtn" class="edit-btn" onclick="enableEditMode()">Edit this card</button>-->
+      <a href="." class="create-btn">CREATE NEW</a>
+      <div class="copyright">© Curion Lab</div>
+    </div>
   </div>
 
   <script type="module">
@@ -338,7 +463,7 @@
       document.getElementById('companyInput').value = DEFAULT_BUSINESS_CARD.company;
       document.getElementById('emailInput').value = DEFAULT_BUSINESS_CARD.email;
       document.getElementById('phoneInput').value = DEFAULT_BUSINESS_CARD.phone || '';
-      document.getElementById('snsInput').value = DEFAULT_BUSINESS_CARD.sns || '';  // ← 追加
+      document.getElementById('snsInput').value = DEFAULT_BUSINESS_CARD.sns || ''; 
       document.getElementById('websiteInput').value = DEFAULT_BUSINESS_CARD.website;
       document.getElementById('layoutSelect').value = DEFAULT_LAYOUT;
     };
@@ -351,7 +476,7 @@
       company: document.getElementById('companyInput').value,
       email: document.getElementById('emailInput').value,
       phone: document.getElementById('phoneInput').value,
-      sns: document.getElementById('snsInput').value,        // ← 追加
+      sns: document.getElementById('snsInput').value,
       website: document.getElementById('websiteInput').value,
     });
 
@@ -362,10 +487,10 @@
       // 初期化のみ（自動開始しない）
       gameEngine = initializeGame(
         'gameContainer',
-        businessCardInfo,      // ← 名刺情報
-        DEFAULT_GAME_CONFIG,   // ← ゲーム設定
-        layout,                // ← レイアウト
-        false                   // ← autoStart = false
+        businessCardInfo,
+        DEFAULT_GAME_CONFIG,
+        layout,
+        false
       );
 
       // 明示的に開始
@@ -474,13 +599,48 @@
     // ページ読み込み時にURLパラメータを優先し、なければデフォルト値を設定
     window.addEventListener('load', () => {
       const hasSharedParams = applySharedParamsToForm();
-      if (!hasSharedParams) {
+      
+      if (hasSharedParams) {
+        // URLパラメータがある場合、共有モードとして表示を変更
+        document.body.classList.add('shared-mode');
+      } else {
+        // パラメータがない場合はデフォルト値をセット
         setDefaultValues();
       }
+
       const businessCardInfo = readBusinessCardInfo();
       const layout = document.getElementById('layoutSelect').value;
       initializeAndStartGame(businessCardInfo, layout);
     });
+    // ... 既存のスクリプト ...
+
+    // 編集モードへ切り替え（共有モード解除）
+    window.enableEditMode = function() {
+      document.body.classList.remove('shared-mode');
+      // フォーム部分へスクロール
+      document.querySelector('.game-section').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.addEventListener('load', () => {
+      const hasSharedParams = applySharedParamsToForm();
+      
+      if (hasSharedParams) {
+        document.body.classList.add('shared-mode');
+        
+        // 【改善】タブのタイトルを動的に変更（名前があれば）
+        const nameVal = document.getElementById('nameInput').value;
+        if (nameVal) {
+          document.title = `${nameVal}'s Business Card - Breakout Game`;
+        }
+      } else {
+        setDefaultValues();
+      }
+
+      const businessCardInfo = readBusinessCardInfo();
+      const layout = document.getElementById('layoutSelect').value;
+      initializeAndStartGame(businessCardInfo, layout);
+    });
+
   </script>
 </body>
 </html>
