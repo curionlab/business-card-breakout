@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400&family=DotGothic16&family=Press+Start+2P&family=ZCOOL+QingKe+HuangYou&family=Noto+Sans+Thai&family=Noto+Sans+Arabic&family=Noto+Sans+KR&display=swap" rel="stylesheet">
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+
   <style>
   * {
       margin: 0;
@@ -159,6 +160,7 @@
       background: linear-gradient(135deg, #FF6B6B, #FF5252);
       color: white;
       box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+      margin-bottom: 8px;
     }
 
     .btn-secondary:hover {
@@ -166,7 +168,6 @@
       box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
     }
 
-    /* 既存のCSSの下に追加 */
 
     /* 編集ボタンのスタイル（少し控えめなデザイン） */
     .edit-btn {
@@ -257,15 +258,17 @@
       justify-content: center;
     }
 
-    /* Shared Footer (Initially Hidden) */
-    .shared-footer {
-      display: none;
+    /* -------------------------------------------------
+    共有モード専用アクション（CREATE NEWボタン）
+    ------------------------------------------------- */
+    .shared-only-actions {
+      display: none; /* 通常時は非表示 */
       text-align: center;
-      margin-top: 30px;
-      width: 100%;
+      margin: 20px 0;
     }
 
-    body.shared-mode .shared-footer {
+    /* 共有モード時（bodyにクラスがついた時）に表示 */
+    body.shared-mode .shared-only-actions {
       display: block;
     }
 
@@ -288,12 +291,31 @@
       box-shadow: 0 6px 20px rgba(0, 212, 255, 0.6);
     }
 
-    .copyright {
-      color: #b0b0b0;
+    .page-footer {
+      width: 100%;
+      padding: 20px 0 10px 0;
+      text-align: center;
       font-size: 14px;
+      color: #b0b0b0;
+      background: transparent;
     }
 
-    @media (max-width: 768px) {
+    .github-link {
+      color: #00D4FF;
+      text-decoration: none;
+      margin-right: 15px;
+      font-weight: bold;
+    }
+
+    .github-link:hover {
+      text-decoration: underline;
+    }
+
+    .copyright {
+      color: #b0b0b0;
+    }
+
+    @media (max-width: 910px) {
       .form-section {
         grid-template-columns: 1fr;
       }
@@ -311,8 +333,7 @@
         flex-direction: column;
       }
 
-    /* スマホでの共有モード時は、余白をなくして画面いっぱいに */
-    @media (max-width: 768px) {
+      /* スマホでの共有モード時は、余白をなくして画面いっぱいに */
       body.shared-mode {
         padding: 0; /* 全体のパディングを削除 */
         justify-content: center; /* 垂直方向中央揃え */
@@ -335,9 +356,8 @@
       }
     }
 
-    }
   </style>
-  <script type="module" crossorigin src="/business-card-breakout/assets/index-BC-WWofe.js"></script>
+  <script type="module" crossorigin src="/business-card-breakout/assets/index-8ex1kNTd.js"></script>
 </head>
 <body>
   <div class="container">
@@ -424,12 +444,17 @@
       </ul>
     </div>
 
-    <!-- New Shared Footer -->
-    <div class="shared-footer">
+    <div class="shared-only-actions">
       <!-- 編集ボタンを追加（onclickイベントを設定） -->
       <!--<button id="editCardBtn" class="edit-btn" onclick="enableEditMode()">Edit this card</button>-->
       <a href="." class="create-btn">CREATE NEW</a>
-      <div class="copyright">© Curion Lab</div>
+    </div>
+    <!-- ページ最下部、bodyの一番下など -->
+    <div class="page-footer">
+      <a href="https://github.com/curionlab/business-card-breakout" target="_blank" rel="noopener" class="github-link">
+        GitHub
+      </a>
+      <span class="copyright">&copy; Curion Lab</span>
     </div>
   </div>
 
