@@ -37,18 +37,25 @@ export class GameEngine {
     const logicalWidth = config?.width || canvasElement.width;
     const logicalHeight = config?.height || canvasElement.height;
 
-    // ← パドル幅を画面幅の相対値で計算
-    const paddleWidthRatio = config?.paddleWidthRatio || 0.4;  // 画面幅の13%
-    const calculatedPaddleWidth = Math.floor(logicalWidth * paddleWidthRatio);
+    // ← ゲーム性調整パラメータ（カスタマイズ可能）
+    const paddleWidthRatio = config?.paddleWidthRatio ?? 0.4;   // 40%
+    const paddleSpeedRatio = config?.paddleSpeedRatio ?? 0.015;  // 1.3%
+    const ballSpeedRatio = config?.ballSpeedRatio ?? 0.009;     // 0.66%
+    const ballRadiusRatio = config?.ballRadiusRatio ?? 0.012;    // 0.9%
     
+    const calculatedPaddleWidth = Math.floor(logicalWidth * paddleWidthRatio);
+    const calculatedPaddleSpeed = Math.max(logicalWidth * paddleSpeedRatio, 5);  // 最低5
+    const calculatedBallSpeed = Math.max(logicalWidth * ballSpeedRatio, 3);      // 最低3
+    const calculatedBallRadius = Math.max(logicalWidth * ballRadiusRatio, 4);    // 最低4
+
     // デフォルト設定
     //configが渡されない場合のフォールバック値として機能します。index.htmlで明示的に値を渡している場合、そちらが優先されます。
     this.config = {
       width: logicalWidth,
       height: logicalHeight,
-      paddleSpeed: 12,
-      ballSpeed: 10,
-      ballRadius: 12,
+      paddleSpeed: calculatedPaddleSpeed,
+      ballSpeed: calculatedBallSpeed,
+      ballRadius: calculatedBallRadius,
       paddleHeight: 4,
       paddleWidthRatio: paddleWidthRatio,
       paddleWidth: calculatedPaddleWidth,  // ← 相対値（自動調整）,
@@ -63,6 +70,7 @@ export class GameEngine {
 
     const dpr = this.config.dpr || 1;
     console.log('GameEngine.tsのdpr:', dpr)
+
     // コンポーネント初期化
     this.ball = new BallPhysics(
       this.config.width / 2,
@@ -431,10 +439,10 @@ export class GameEngine {
     this.renderer.drawParticles(this.particleSystem.getParticles());
     
     //キャンパス内のスコア表示
-    this.renderer.drawScore(this.score);
+    this.renderer.drawScore(this.score, this.config.width, this.config.height);
     
     if (this.gameOver) {
-      this.renderer.drawGameOver(this.config.width, this.config.height);
+      this.renderer.drawGameOver(this.config.width, this.config.height, this.score);
     } else if (this.gameCleared) {
       this.renderer.drawGameClear(this.config.width, this.config.height, this.score);
     }

@@ -8,7 +8,10 @@ export interface GameConfig {
   ballSpeed: number;
   ballRadius: number;
   paddleHeight: number;
-  paddleWidthRatio: number;
+  paddleWidthRatio?: number;   // パドル幅の比率（デフォルト: 0.4）
+  paddleSpeedRatio?: number;   // パドル速度の比率（デフォルト: 0.015）
+  ballSpeedRatio?: number;     // ボール速度の比率（デフォルト: 0.009）
+  ballRadiusRatio?: number;    // ボール半径の比率（デフォルト: 0.012）
   paddleWidth: number;
   gravity: number;
   friction: number;

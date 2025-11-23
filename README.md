@@ -135,16 +135,23 @@ engine.start();
 
 ```
 {
-  ballSpeed: number;           // Ball movement speed (default: 10)
-  ballRadius: number;          // Ball size in pixels (default: 12)
-  paddleSpeed: number;         // Paddle movement speed (default: 12)
-  paddleWidthRatio: number;    // Paddle width ratio (default: 0.2)
-  paddleHeight: number;        // Paddle height in pixels (default: 4)
-  blockRecoveryTime: number;   // Block respawn time in ms (default: 10000)
-  effectDuration: number;      // Effect animation duration in ms (default: 5000)
-  destructionRadius: number;   // Destruction area radius (default: 30)
-  gravity: number;             // Vertical acceleration (default: 0)
-  friction: number;            // Ball velocity retention (default: 1.0)
+  // --- Game Mechanics (Relative Values) ---
+  paddleWidthRatio: number; // Paddle width relative to screen width (default: 0.4 = 40%)
+  paddleSpeedRatio: number; // Paddle speed relative to screen width (default: 0.015)
+  ballSpeedRatio: number; // Ball speed relative to screen width (default: 0.009)
+  ballRadiusRatio: number; // Ball size relative to screen width (default: 0.012)
+
+  // --- Physics & Timing ---
+  blockRecoveryTime: number; // Time until blocks reappear in ms (default: 10000)
+  effectDuration: number; // Duration of particle effects in ms (default: 5000)
+  gravity: number; // Gravity applied to the ball (default: 0)
+  friction: number; // Friction applied to the paddle (default: 1.0)
+
+  // --- Fixed Values (Optional overrides) ---
+  paddleHeight: number; // Fixed paddle height in pixels (default: 4)
+  // Note: paddleWidth, paddleSpeed, ballSpeed, and ballRadius are automatically calculated
+  // based on the ratios above, but can be manually overridden if needed.
+  destructionRadius: number;   // Destruction area radius (default: 30)
 }
 ```
 

@@ -24,10 +24,10 @@
    * デフォルトのゲーム設定
    */
   export const DEFAULT_GAME_CONFIG = {
-    ballSpeed: 10,
-    ballRadius: 12,
-    paddleSpeed: 12,
     paddleWidthRatio: 0.4,
+    paddleSpeedRatio: 0.015,
+    ballSpeedRatio: 0.009,
+    ballRadiusRatio: 0.012,
     paddleHeight: 4,
     gravity: 0,
     friction: 1.0,

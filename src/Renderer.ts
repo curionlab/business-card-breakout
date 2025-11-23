@@ -181,11 +181,14 @@ export class Renderer {
   /**
    * スコアテキストを描画
    */
-  drawScore(score: number, x: number = 20, y: number = 30): void {
+  drawScore(score: number, width: number, height: number, x: number = 20, y: number = 30): void {
     this.ctx.save();
     this.ctx.fillStyle = '#FFFFFF';
-    this.ctx.font = 'bold 20px Arial';
+    const fontSize = height * 0.05;
+    this.ctx.font = `${fontSize}px "Bitcount Prop Single"`;
     this.ctx.textAlign = 'left';
+    x = width * 0.02;
+    y = height * 0.05;
     this.ctx.fillText(`Score: ${score}`, x, y);
     this.ctx.restore();
   }
@@ -193,7 +196,7 @@ export class Renderer {
   /**
    * ゲームオーバーテキストを描画
    */
-  drawGameOver(width: number, height: number): void {
+  drawGameOver(width: number, height: number, score: number): void {
     this.ctx.save();
 
     // 半透明のオーバーレイ
@@ -212,9 +215,11 @@ export class Renderer {
     this.ctx.fillText('THANKS FOR', width / 2, height / 2 - 60);
     this.ctx.fillText('CONNECTING!', width / 2, height / 2 - 60 + mainFontSize);
 
+    this.ctx.font = `${subFontSize}px "Bitcount Prop Single"`;
+    this.ctx.fillText(`Score: ${score}`, width / 2, height / 2 - 60 + mainFontSize + 2 * subFontSize);
     // サブテキスト
     this.ctx.font = `${subFontSize}px "Bitcount Prop Single"`;
-    this.ctx.fillText('Tap or Press R to restart', width / 2, height / 2 + 20 + mainFontSize);
+    this.ctx.fillText('Tap or Press R to restart', width / 2, height / 2 + mainFontSize + 4  + mainFontSize);
 
     this.ctx.restore();
   }
