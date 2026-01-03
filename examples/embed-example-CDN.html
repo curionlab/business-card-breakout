@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Card Breakout - CDN Example</title>
+  
+  <!-- Recommended: Pixel-style fonts for retro look -->
+  <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400&family=DotGothic16&family=Press+Start+2P&family=ZCOOL+QingKe+HuangYou&family=Noto+Sans+Thai&family=Noto+Sans+Arabic&family=Noto+Sans+KR&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Press Start 2P', monospace;
+      background: #1a1a2e;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    
+    p {
+      font-size: 0.7rem;
+      margin-bottom: 20px;
+      text-align: center;
+      max-width: 600px;
+      line-height: 1.5;
+    }
+    
+    #game-container {
+      width: 100%;
+      max-width: 600px;  /* Required: specify container width */
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+    
+    .controls {
+      margin-top: 20px;
+      font-size: 0.7rem;
+      text-align: center;
+    }
+    
+    @media (max-width: 640px) {
+      h1 { font-size: 1rem; }
+      p { font-size: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Business Card Breakout</h1>
+  <p>Use arrow keys or mouse to control the paddle. Break all blocks to win!</p>
+  
+  <div id="game-container"></div>
+  
+  <div class="controls">
+    <p>← → Arrow Keys or Mouse</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/business-card-breakout@latest/dist/index.umd.js"></script>
+  <script>
+    // Initialize the game with sample business card data
+    const engine = BusinessCardBreakout.initializeGame(
+      'game-container',
+      {
+        name: 'Jane Doe',
+        nameEn: '',
+        title: 'Creative Developer',
+        tagline: 'Building interactive experiences',
+        company: 'Innovation Studio',
+        email: 'jane.doe@example.com',
+        phone: '+1-555-0123',
+        sns: '@janedoe',
+        website: 'janedoe.dev'
+      },
+      BusinessCardBreakout.DEFAULT_GAME_CONFIG,
+      'professional',  // Try: 'professional', 'standard', or 'minimal'
+      false
+    );
+    
+    // Start the game
+    engine.start();
+  </script>
+</body>
+</html>
