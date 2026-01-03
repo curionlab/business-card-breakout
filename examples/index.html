@@ -490,17 +490,30 @@
     /**
      * デフォルト値をフォームに設定
      */
+    
+    // デモ用の初期データ（ライブラリのデフォルトではなく、デモサイト独自の設定にする）
+    const demoData = {
+      name: '山田　太郎',
+      nameEn: 'Taro Yamada',
+      title: 'Senior Software Engineer',
+      tagline: 'Building the future, one line at a time.',
+      company: 'Tech Solutions Inc.',
+      email: 'taro.yamada@example.com',
+      phone: '+81-90-0000-0000',
+      website: 'https://www.example.com/'
+    };
+
     const setDefaultValues = () => {
-      document.getElementById('nameInput').value = DEFAULT_BUSINESS_CARD.name;
-      document.getElementById('nameEnInput').value = DEFAULT_BUSINESS_CARD.nameEn || '';
-      document.getElementById('titleInput').value = DEFAULT_BUSINESS_CARD.title;
-      document.getElementById('taglineInput').value = DEFAULT_BUSINESS_CARD.tagline || '';
-      document.getElementById('companyInput').value = DEFAULT_BUSINESS_CARD.company;
-      document.getElementById('emailInput').value = DEFAULT_BUSINESS_CARD.email;
-      document.getElementById('phoneInput').value = DEFAULT_BUSINESS_CARD.phone || '';
-      document.getElementById('snsInput').value = DEFAULT_BUSINESS_CARD.sns || ''; 
-      document.getElementById('websiteInput').value = DEFAULT_BUSINESS_CARD.website;
-      document.getElementById('layoutSelect').value = DEFAULT_LAYOUT;
+      document.getElementById('nameInput').value = DEMO_DATA.name;
+      document.getElementById('nameEnInput').value = DEMO_DATA.nameEn;
+      document.getElementById('titleInput').value = DEMO_DATA.title;
+      document.getElementById('taglineInput').value = DEMO_DATA.tagline;
+      document.getElementById('companyInput').value = DEMO_DATA.company;
+      document.getElementById('emailInput').value = DEMO_DATA.email;
+      document.getElementById('phoneInput').value = DEMO_DATA.phone;
+      document.getElementById('snsInput').value = DEMO_DATA.sns;
+      document.getElementById('websiteInput').value = DEMO_DATA.website;
+      document.getElementById('layoutSelect').value = DEFAULT_LAYOUT; // レイアウトはデフォルトのままでOK
     };
 
     const readBusinessCardInfo = () => ({

@@ -2,21 +2,15 @@
    * デフォルトの名刺情報
    */
   export const DEFAULT_BUSINESS_CARD = {
-    name: '山田　太郎',           // 日本語
-    // name: 'Müller Schmidt',   // ドイツ語
-    // name: 'Владимир Петров',  // ロシア語（キリル文字）
-    // name: '王小明',           // 中国語
-    // name: '김민수',           // 韓国語
-    // name: 'สมชาย วงศ์สุวรรณ', // タイ語
-    // name: 'أحمد محمد',        // アラビア語  
-    nameEn: 'Taro Yamada',
-    title: 'Senior Software Engineer',
-    tagline: 'Building the future, one line at a time.',
-    company: 'Tech Solutions Inc.',
-    email: 'taro.yamada@example.com',
-    phone: '+81-90-0000-0000',
-    sns: 'https://example.com/taroy',
-    website: 'https://www.example.com/'
+    name: 'Your Name',  
+    nameEn: '',
+    title: '',
+    tagline: '',
+    company: '',
+    email: '',
+    phone: '',
+    sns: '',
+    website: ''
   };
 
   
