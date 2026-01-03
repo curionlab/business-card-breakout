@@ -1,9 +1,16 @@
 # 🎮 Business Card Breakout
 
-Transform your business card into an interactive breakout game! A fun and creative way to showcase your contact information on your website or portfolio.
-
+[![Live Demo](https://img.shields.io/badge/🎮_Play-Live_Demo-blue?style=for-the-badge)](https://curionlab.github.io/business-card-breakout/)
 [![npm version](https://img.shields.io/npm/v/business-card-breakout.svg)](https://www.npmjs.com/package/business-card-breakout)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Transform your business card into an interactive breakout game! A fun and creative way to showcase your contact information on your website or portfolio.
+
+## [🚀 Try Live Demo →](https://curionlab.github.io/business-card-breakout/)
+
+![Demo](./demo.gif)
+
+> 💡 **Tip**: Click the demo link above to play with different layouts and see the game in action!
 
 ## ✨ Features
 
@@ -19,7 +26,7 @@ Transform your business card into an interactive breakout game! A fun and creati
 
 ### Via CDN (Easiest)
 
-```
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -55,11 +62,11 @@ Transform your business card into an interactive breakout game! A fun and creati
 
 ### Via npm
 
-```
+```bash
 npm install business-card-breakout
 ```
 
-```
+```javascript
 import { initializeGame, DEFAULT_GAME_CONFIG } from 'business-card-breakout';
 
 const engine = initializeGame(
@@ -83,7 +90,7 @@ engine.start();
 
 **The container element must have a width specified.** The height is automatically calculated based on the business card aspect ratio (91:55).
 
-```
+```html
 <!-- ✅ Good: CSS style -->
 <style>
   #game { width: 600px; }
@@ -111,7 +118,7 @@ engine.start();
 
 ### Business Card Configuration
 
-```
+```typescript
 {
   name: string;           // Required: Your name
   nameEn?: string;        // Optional: English name (for non-English names)
@@ -133,7 +140,7 @@ engine.start();
 
 ### Game Configuration
 
-```
+```typescript
 {
   // --- Game Mechanics (Relative Values) ---
   paddleWidthRatio: number; // Paddle width relative to screen width (default: 0.4 = 40%)
@@ -151,15 +158,17 @@ engine.start();
   paddleHeight: number; // Fixed paddle height in pixels (default: 4)
   // Note: paddleWidth, paddleSpeed, ballSpeed, and ballRadius are automatically calculated
   // based on the ratios above, but can be manually overridden if needed.
-  destructionRadius: number;   // Destruction area radius (default: 30)
+  destructionRadius: number;   // Destruction area radius (default: 30)
 }
 ```
 
 ## 🎨 Examples
 
+**[👉 See more examples in live demo](https://curionlab.github.io/business-card-breakout/)**
+
 ### Japanese Business Card (Full)
 
-```
+```javascript
 const engine = initializeGame('game', {
   name: '山田 太郎',
   nameEn: 'Taro Yamada',
@@ -177,7 +186,7 @@ engine.start();
 
 ### English Business Card (Minimal)
 
-```
+```javascript
 const engine = initializeGame('game', {
   name: 'Jane Smith',
   title: 'Product Manager',
@@ -200,7 +209,7 @@ engine.start();
 
 ### Game Engine Methods
 
-```
+```javascript
 engine.start();     // Start the game
 engine.stop();      // Stop the game
 engine.pause();     // Pause the game
@@ -210,12 +219,12 @@ engine.resume();    // Resume the game
 ## 🎨 Recommended: Custom Font
 
 For a pixel-style retro look, add this font before the game script:
-```
+```html
 <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400&family=DotGothic16&family=Press+Start+2P&family=ZCOOL+QingKe+HuangYou&family=Noto+Sans+Thai&family=Noto+Sans+Arabic&family=Noto+Sans+KR&display=swap" rel="stylesheet">
 ```
 
 ### Complete example:  
-```
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -245,21 +254,6 @@ For a pixel-style retro look, add this font before the game script:
 - **ES Module**: ~51.6 KB
 - **TypeScript Types**: Included
 
-## 📄 License
-
-MIT © [Curion Lab](https://github.com/curionlab)
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 🔗 Links
-
-- [GitHub Repository](https://github.com/curionlab/business-card-breakout)
-- [npm Package](https://www.npmjs.com/package/business-card-breakout)
-- [CDN (jsDelivr)](https://cdn.jsdelivr.net/npm/business-card-breakout@latest/)
-- [Examples](https://github.com/curionlab/business-card-breakout/tree/main/examples)
-
 ## 🎯 Use Cases
 
 Perfect for:
@@ -269,7 +263,22 @@ Perfect for:
 - 📧 Email signatures (with link)
 - 🌐 Personal branding
 
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 🔗 Links
+
+- **[🎮 Live Demo](https://curionlab.github.io/business-card-breakout/)** ⭐
+- [GitHub Repository](https://github.com/curionlab/business-card-breakout)
+- [npm Package](https://www.npmjs.com/package/business-card-breakout)
+- [CDN (jsDelivr)](https://cdn.jsdelivr.net/npm/business-card-breakout@latest/)
+- [Examples](https://github.com/curionlab/business-card-breakout/tree/main/examples)
+
+## 📄 License
+
+MIT © [Curion Lab](https://github.com/curionlab)
+
 ---
 
 Made with ❤️ by [Curion Lab](https://www.curionlab.com/)
-
