@@ -1,0 +1,9 @@
+name = "business-card-breakout"
+pages_build_output_dir = "dist-demo"
+compatibility_date = "2024-09-23"
+
+# Cloudflare Pages Functions が dist-demo と同じルートに配置されるため
+# functions/ ディレクトリは自動的に認識される
+
+[build]
+command = "npm run build:demo"

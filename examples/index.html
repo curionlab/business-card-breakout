@@ -4,6 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Business Card Breakout - Interactive Game</title>
+
+  <!-- Canonical & SEO -->
+  <link rel="canonical" href="https://breakout.curionlab.com/" />
+  <meta name="description" content="名刺をブロック崩しゲームに！名前・会社名・肩書きを入力してSNSでシェアすると、名刺画像付きのリンクが生成されます。" />
+
+  <!-- Open Graph (fallback — dynamic values are injected by Cloudflare Edge Middleware for bots) -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://breakout.curionlab.com/" />
+  <meta property="og:title"       content="Business Card Breakout" />
+  <meta property="og:description" content="名刺をブロック崩しゲームに！ SNSでシェアすると名刺画像が表示されます。" />
+  <meta property="og:image"       content="https://breakout.curionlab.com/api/og" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name"   content="Business Card Breakout" />
+  <meta property="og:locale"      content="ja_JP" />
+
+  <!-- Twitter Card (fallback) -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Business Card Breakout" />
+  <meta name="twitter:description" content="名刺をブロック崩しゲームに！ SNSでシェアすると名刺画像が表示されます。" />
+  <meta name="twitter:image"       content="https://breakout.curionlab.com/api/og" />
+
   <!-- Google Fonts: DotGothic16 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -625,9 +647,10 @@
       // JSON → 圧縮 → Base64（URL-safe）
       const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(data));
 
-      const url = new URL(window.location.href);
-      url.search = `?d=${compressed}`; // 1つのパラメータに集約
-      url.hash = '';
+      // 本番ドメインでシェアURLを生成（OGPがエッジで処理されるため）
+      const baseUrl = 'https://breakout.curionlab.com/';
+      const url = new URL(baseUrl);
+      url.search = `?d=${compressed}`;
       return url.toString();
     };
 

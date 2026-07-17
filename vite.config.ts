@@ -19,7 +19,7 @@ export default defineConfig(({ command, mode }) => {
   if (mode === 'demo') {
     return {
       root: 'examples',
-      base: '/business-card-breakout/',
+      base: '/',  // Cloudflare Pages + breakout.curionlab.com はルートで配信
       build: {
         outDir: '../dist-demo',
         emptyOutDir: true
