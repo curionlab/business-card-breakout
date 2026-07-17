@@ -1,6 +1,6 @@
 /**
  * /api/og - Dynamic OGP image generation endpoint
- * Generates a 1200x630 PNG business card image using @cloudflare/pages-plugin-vercel-og
+ * Generates a 1200x630 PNG business card image using @cf-wasm/og (workerd runtime)
  *
  * Query params:
  *   name     - 名前 (Japanese)
@@ -9,15 +9,18 @@
  *   company  - 会社名
  */
 
-import { ImageResponse } from '@cloudflare/pages-plugin-vercel-og/api';
+// @ts-ignore
+import { ImageResponse, cache, GoogleFont } from '@cf-wasm/og/workerd';
 
-// Font URLs — Noto Sans JP (regular) from Google Fonts CDN
-const NOTO_SANS_JP_URL =
-  'https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEi75g.woff2';
-const NOTO_SANS_URL =
-  'https://fonts.gstatic.com/s/notosans/v36/o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5a7du3mhPy0.woff2';
+// Font URLs — Noto Sans JP from Google Fonts
+const JP_FONT  = new GoogleFont('Noto Sans JP', { weight: 400 });
+const EN_FONT  = new GoogleFont('Noto Sans',    { weight: 400 });
 
 export const onRequest: PagesFunction = async (context) => {
+  // @cf-wasm/og のキャッシュに実行コンテキストを渡す（必須）
+  // @ts-ignore
+  cache.setExecutionContext(context);
+
   const url = new URL(context.request.url);
   const name    = (url.searchParams.get('name')    ?? '').slice(0, 30);
   const nameEn  = (url.searchParams.get('nameEn')  ?? '').slice(0, 40);
@@ -25,29 +28,20 @@ export const onRequest: PagesFunction = async (context) => {
   const company = (url.searchParams.get('company') ?? '').slice(0, 50);
 
   try {
-    // Fetch fonts in parallel
-    const [jpFontData, enFontData] = await Promise.all([
-      fetch(NOTO_SANS_JP_URL).then(r => r.arrayBuffer()),
-      fetch(NOTO_SANS_URL).then(r => r.arrayBuffer()),
-    ]);
-
-    // Return an ImageResponse using the official Cloudflare Satori plugin.
-    // It takes standard JSX / virtual DOM objects.
-    return new ImageResponse(
+    // @ts-ignore
+    const response = await ImageResponse.async(
       buildCardElement(name, nameEn, title, company),
       {
         width: 1200,
         height: 630,
-        fonts: [
-          { name: 'NotoSansJP', data: jpFontData, weight: 400, style: 'normal' },
-          { name: 'NotoSans',   data: enFontData, weight: 400, style: 'normal' },
-          { name: 'NotoSans',   data: enFontData, weight: 700, style: 'normal' },
-        ],
-        headers: {
-          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
-        }
+        fonts: [JP_FONT, EN_FONT],
       }
     );
+
+    // キャッシュヘッダーを付与して返す
+    const headers = new Headers(response.headers);
+    headers.set('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    return new Response(response.body, { status: response.status, headers });
 
   } catch (err) {
     console.error('[og] image generation error:', err);
