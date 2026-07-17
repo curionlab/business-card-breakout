@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { ImageResponse, CustomFont, cache } from '@cf-wasm/og/workerd';
+import { decodeCardData } from '../lib/decode';
 
 // Font URLs — Noto Sans JP (regular) from Google Fonts CDN
 const NOTO_SANS_JP_URL =
@@ -19,10 +20,25 @@ export const onRequest: PagesFunction = async (context) => {
   cache.setExecutionContext(context);
 
   const url = new URL(context.request.url);
-  const name    = (url.searchParams.get('name')    ?? '').slice(0, 30);
-  const nameEn  = (url.searchParams.get('nameEn')  ?? '').slice(0, 40);
-  const title   = (url.searchParams.get('title')   ?? '').slice(0, 50);
-  const company = (url.searchParams.get('company') ?? '').slice(0, 50);
+  const compressed = url.searchParams.get('d');
+
+  let name = '';
+  let nameEn = '';
+  let title = '';
+  let company = '';
+
+  if (compressed) {
+    const card = decodeCardData(compressed);
+    name = card.name ?? '';
+    nameEn = card.nameEn ?? '';
+    title = card.title ?? '';
+    company = card.company ?? '';
+  } else {
+    name    = (url.searchParams.get('name')    ?? '').slice(0, 30);
+    nameEn  = (url.searchParams.get('nameEn')  ?? '').slice(0, 40);
+    title   = (url.searchParams.get('title')   ?? '').slice(0, 50);
+    company = (url.searchParams.get('company') ?? '').slice(0, 50);
+  }
 
   try {
     const fonts = [
