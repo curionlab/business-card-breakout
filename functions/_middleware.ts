@@ -58,7 +58,7 @@ export const onRequest: PagesFunction = async (context) => {
       : DEFAULT_TITLE;
 
     ogDescription = parts.length > 0
-      ? `${parts.join(' | ')} のブロック崩し名刺を受け取りました！`
+      ? `${parts.join(' | ')} のブロック崩し名刺を作りました！`
       : DEFAULT_DESCRIPTION;
 
     // 動的OGP画像URLに圧縮名刺情報をそのまま付与

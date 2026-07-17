@@ -98,7 +98,7 @@ function GameScreenLayout({ card }: { card: CardProps }) {
         style={{
           position: 'absolute',
           top: '30px',
-          left: '30px',
+          left: '50px',
           fontSize: '32px',
           color: '#ffffff',
           letterSpacing: '2px',
