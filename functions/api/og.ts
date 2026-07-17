@@ -1,6 +1,6 @@
 /**
  * /api/og - Dynamic OGP image generation endpoint
- * Generates a 1200x630 PNG business card image using Satori + @resvg/resvg-wasm
+ * Generates a 1200x630 PNG business card image using @cloudflare/pages-plugin-vercel-og
  *
  * Query params:
  *   name     - 名前 (Japanese)
@@ -9,20 +9,13 @@
  *   company  - 会社名
  */
 
-// @ts-ignore - satori is a peer dependency installed separately
-import satori from 'satori';
-// @ts-ignore
-import { Resvg, initWasm } from '@resvg/resvg-wasm';
-// @ts-ignore - WASM binary imported as module
-import resvgWasm from '@resvg/resvg-wasm/index_bg.wasm';
+import { ImageResponse } from '@cloudflare/pages-plugin-vercel-og/api';
 
 // Font URLs — Noto Sans JP (regular) from Google Fonts CDN
 const NOTO_SANS_JP_URL =
   'https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEi75g.woff2';
 const NOTO_SANS_URL =
   'https://fonts.gstatic.com/s/notosans/v36/o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5a7du3mhPy0.woff2';
-
-let wasmInitialized = false;
 
 export const onRequest: PagesFunction = async (context) => {
   const url = new URL(context.request.url);
@@ -31,51 +24,30 @@ export const onRequest: PagesFunction = async (context) => {
   const title   = (url.searchParams.get('title')   ?? '').slice(0, 50);
   const company = (url.searchParams.get('company') ?? '').slice(0, 50);
 
-  // Cache key based on params
-  const cacheKey = new Request(url.toString(), context.request);
-  const cache = caches.default;
-  const cached = await cache.match(cacheKey);
-  if (cached) return cached;
-
   try {
-    // Initialize WASM once per isolate
-    if (!wasmInitialized) {
-      await initWasm(resvgWasm);
-      wasmInitialized = true;
-    }
-
     // Fetch fonts in parallel
     const [jpFontData, enFontData] = await Promise.all([
       fetch(NOTO_SANS_JP_URL).then(r => r.arrayBuffer()),
       fetch(NOTO_SANS_URL).then(r => r.arrayBuffer()),
     ]);
 
-    // Build business card SVG via Satori
-    const svg = await satori(buildCardElement(name, nameEn, title, company), {
-      width: 1200,
-      height: 630,
-      fonts: [
-        { name: 'NotoSansJP', data: jpFontData, weight: 400, style: 'normal' },
-        { name: 'NotoSans',   data: enFontData, weight: 400, style: 'normal' },
-        { name: 'NotoSans',   data: enFontData, weight: 700, style: 'normal' },
-      ],
-    });
-
-    // Convert SVG → PNG
-    const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
-    const pngData = resvg.render();
-    const pngBuffer = pngData.asPng();
-
-    const response = new Response(pngBuffer, {
-      headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400',
-      },
-    });
-
-    // Store in Cloudflare edge cache
-    context.waitUntil(cache.put(cacheKey, response.clone()));
-    return response;
+    // Return an ImageResponse using the official Cloudflare Satori plugin.
+    // It takes standard JSX / virtual DOM objects.
+    return new ImageResponse(
+      buildCardElement(name, nameEn, title, company),
+      {
+        width: 1200,
+        height: 630,
+        fonts: [
+          { name: 'NotoSansJP', data: jpFontData, weight: 400, style: 'normal' },
+          { name: 'NotoSans',   data: enFontData, weight: 400, style: 'normal' },
+          { name: 'NotoSans',   data: enFontData, weight: 700, style: 'normal' },
+        ],
+        headers: {
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+        }
+      }
+    );
 
   } catch (err) {
     console.error('[og] image generation error:', err);
