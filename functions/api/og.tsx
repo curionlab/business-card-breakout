@@ -1,19 +1,26 @@
 /**
  * /api/og - Dynamic OGP image generation endpoint
- * Generates a 1200x630 PNG business card image using @cf-wasm/og/workerd
+ * Generates a 1200x630 PNG business card image replicating the retro game screen
  */
 
 import React from 'react';
 import { ImageResponse, CustomFont, cache } from '@cf-wasm/og/workerd';
 import { decodeCardData } from '../lib/decode';
 
-// Font URLs — Noto Sans JP (regular) from Google Fonts CDN
-const NOTO_SANS_JP_URL =
-  'https://fonts.gstatic.com/s/notosansjp/v56/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEj75s.ttf';
-const NOTO_SANS_URL_400 =
-  'https://fonts.gstatic.com/s/notosans/v42/o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjcz6L1SoM-jCpoiyD9A99d.ttf';
-const NOTO_SANS_URL_700 =
-  'https://fonts.gstatic.com/s/notosans/v42/o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjcz6L1SoM-jCpoiyAaBN9d.ttf';
+// Font URL — DotGothic16 (Retro Japanese Pixel Font) from Google Fonts CDN
+const DOT_GOTHIC_16_URL =
+  'https://fonts.gstatic.com/s/dotgothic16/v21/v6-QGYjBJFKgyw5nSoDAGE7L.ttf';
+
+interface CardProps {
+  name?: string;
+  nameEn?: string;
+  title?: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  sns?: string;
+  website?: string;
+}
 
 export const onRequest: PagesFunction = async (context) => {
   // Required by @cf-wasm/og
@@ -22,34 +29,31 @@ export const onRequest: PagesFunction = async (context) => {
   const url = new URL(context.request.url);
   const compressed = url.searchParams.get('d');
 
-  let name = '';
-  let nameEn = '';
-  let title = '';
-  let company = '';
+  let card: CardProps = {};
 
   if (compressed) {
-    const card = decodeCardData(compressed);
-    name = card.name ?? '';
-    nameEn = card.nameEn ?? '';
-    title = card.title ?? '';
-    company = card.company ?? '';
+    card = decodeCardData(compressed);
   } else {
-    name    = (url.searchParams.get('name')    ?? '').slice(0, 30);
-    nameEn  = (url.searchParams.get('nameEn')  ?? '').slice(0, 40);
-    title   = (url.searchParams.get('title')   ?? '').slice(0, 50);
-    company = (url.searchParams.get('company') ?? '').slice(0, 50);
+    card = {
+      name: url.searchParams.get('name') ?? '',
+      nameEn: url.searchParams.get('nameEn') ?? '',
+      title: url.searchParams.get('title') ?? '',
+      company: url.searchParams.get('company') ?? '',
+      email: url.searchParams.get('email') ?? '',
+      phone: url.searchParams.get('phone') ?? '',
+      sns: url.searchParams.get('sns') ?? '',
+      website: url.searchParams.get('website') ?? '',
+    };
   }
 
   try {
     const fonts = [
-      new CustomFont('NotoSansJP', () => fetch(NOTO_SANS_JP_URL).then(r => r.arrayBuffer()), { weight: 400 }),
-      new CustomFont('NotoSans', () => fetch(NOTO_SANS_URL_400).then(r => r.arrayBuffer()), { weight: 400 }),
-      new CustomFont('NotoSans', () => fetch(NOTO_SANS_URL_700).then(r => r.arrayBuffer()), { weight: 700 }),
+      new CustomFont('DotGothic16', () => fetch(DOT_GOTHIC_16_URL).then(r => r.arrayBuffer()), { weight: 400 }),
     ];
 
-    // Return an ImageResponse using cf-wasm/og
+    // Return an ImageResponse replicating the breakout game board
     return await ImageResponse.async(
-      <CardLayout name={name} nameEn={nameEn} title={title} company={company} />,
+      <GameScreenLayout card={card} />,
       {
         width: 1200,
         height: 630,
@@ -67,18 +71,12 @@ export const onRequest: PagesFunction = async (context) => {
 };
 
 // ---------------------------------------------------------------------------
-// Card Layout Component
+// Card Layout Component (Replicating the actual Breakout Game Screen)
 // ---------------------------------------------------------------------------
 
-function CardLayout({ name, nameEn, title, company }: { name: string, nameEn: string, title: string, company: string }) {
-  const hasName    = name.trim().length > 0;
-  const hasNameEn  = nameEn.trim().length > 0;
-  const hasTitle   = title.trim().length > 0;
-  const hasCompany = company.trim().length > 0;
-
-  const displayName    = hasName   ? name    : (hasNameEn ? nameEn : 'Business Card Breakout');
-  const displaySubName = hasName && hasNameEn ? nameEn : '';
-
+function GameScreenLayout({ card }: { card: CardProps }) {
+  const name = card.name || card.nameEn || 'Business Card Breakout';
+  
   return (
     <div
       style={{
@@ -86,193 +84,137 @@ function CardLayout({ name, nameEn, title, company }: { name: string, nameEn: st
         height: '630px',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'flex-start',
-        background: 'linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%)',
-        padding: '80px 100px',
-        fontFamily: "'NotoSansJP', 'NotoSans', sans-serif",
+        background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
+        fontFamily: "'DotGothic16', monospace",
         position: 'relative',
         overflow: 'hidden',
+        padding: '0',
       }}
     >
+      {/* 1. Score Counter (Top-Left) */}
       <div
         style={{
           position: 'absolute',
-          top: '-120px',
-          right: '-80px',
-          width: '500px',
-          height: '500px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,212,255,0.15) 0%, rgba(0,212,255,0) 70%)',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '-100px',
-          left: '-60px',
-          width: '400px',
-          height: '400px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,215,0,0.10) 0%, rgba(255,215,0,0) 70%)',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: '48px',
-          right: '80px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-        }}
-      >
-        <span
-          style={{
-            fontSize: '20px',
-            color: 'rgba(255,255,255,0.4)',
-            fontFamily: "'NotoSans', sans-serif",
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-          }}
-        >
-          Business Card Breakout
-        </span>
-      </div>
-      <div
-        style={{
-          width: '80px',
-          height: '4px',
-          background: 'linear-gradient(90deg, #00D4FF, #FFD700)',
-          borderRadius: '2px',
-          marginBottom: '32px',
-          display: 'flex',
-        }}
-      />
-      <div
-        style={{
-          fontSize: hasName ? '80px' : '64px',
-          fontWeight: 700,
+          top: '30px',
+          left: '30px',
+          fontSize: '32px',
           color: '#ffffff',
-          lineHeight: '1.1',
-          marginBottom: '8px',
-          letterSpacing: hasName ? '2px' : '0px',
-          display: 'flex',
+          letterSpacing: '2px',
         }}
       >
-        {displayName}
+        Score: 0
       </div>
-      {displaySubName ? (
-        <div
-          style={{
-            fontSize: '36px',
-            color: 'rgba(255,255,255,0.55)',
-            fontFamily: "'NotoSans', sans-serif",
-            marginBottom: '28px',
-            letterSpacing: '1px',
-            display: 'flex',
-          }}
-        >
-          {displaySubName}
-        </div>
-      ) : (
-        <div style={{ marginBottom: '28px', display: 'flex' }} />
-      )}
+
+      {/* 2. Yellow Ball (Game Ball) */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '70px',
+          left: '680px',
+          width: '28px',
+          height: '28px',
+          borderRadius: '50%',
+          backgroundColor: '#FFD607',
+          boxShadow: '0 0 10px #FFD607',
+        }}
+      />
+
+      {/* 3. Card Elements Container (Main Blocks) */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px',
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start',
+          marginLeft: '150px',
+          marginTop: '110px',
         }}
       >
-        {hasCompany && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: '#FFD700',
-                flexShrink: 0,
-                display: 'flex',
-              }}
-            />
-            <span
-              style={{
-                fontSize: '32px',
-                color: '#FFD700',
-                fontFamily: "'NotoSansJP', 'NotoSans', sans-serif",
-                letterSpacing: '1px',
-              }}
-            >
-              {company}
-            </span>
-          </div>
-        )}
-        
-        {hasTitle && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: '#00D4FF',
-                flexShrink: 0,
-                display: 'flex',
-              }}
-            />
-            <span
-              style={{
-                fontSize: '28px',
-                color: '#00D4FF',
-                fontFamily: "'NotoSansJP', 'NotoSans', sans-serif",
-                letterSpacing: '1px',
-              }}
-            >
-              {title}
-            </span>
-          </div>
-        )}
+        {/* Name */}
+        <div
+          style={{
+            fontSize: '72px',
+            color: '#FF6B8A',
+            marginBottom: '20px',
+            letterSpacing: '1px',
+          }}
+        >
+          {name}
+        </div>
 
-        {!hasCompany && !hasTitle && (
+        {/* Title */}
+        {card.title && (
           <div
             style={{
-              fontSize: '28px',
-              color: 'rgba(255,255,255,0.4)',
-              fontFamily: "'NotoSans', sans-serif",
-              display: 'flex',
+              fontSize: '40px',
+              color: '#A78BFA',
+              marginBottom: '10px',
+              letterSpacing: '1px',
             }}
           >
-            Interactive Business Card Game
+            {card.title}
           </div>
         )}
+
+        {/* Company */}
+        {card.company && (
+          <div
+            style={{
+              fontSize: '46px',
+              color: '#60A5FA',
+              marginBottom: '24px',
+              letterSpacing: '1px',
+            }}
+          >
+            {card.company}
+          </div>
+        )}
+
+        {/* Contacts */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          }}
+        >
+          {card.email && (
+            <div style={{ fontSize: '28px', color: '#34D399', letterSpacing: '1px' }}>
+              {card.email}
+            </div>
+          )}
+          {card.phone && (
+            <div style={{ fontSize: '28px', color: '#FB923C', letterSpacing: '1px' }}>
+              {card.phone}
+            </div>
+          )}
+          {card.sns && (
+            <div style={{ fontSize: '28px', color: '#F472B6', letterSpacing: '1px' }}>
+              {card.sns}
+            </div>
+          )}
+          {card.website && (
+            <div style={{ fontSize: '28px', color: '#FBBF24', letterSpacing: '1px' }}>
+              {card.website}
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* 4. White Game Paddle (Bottom Right) */}
       <div
         style={{
           position: 'absolute',
-          bottom: '48px',
-          left: '100px',
-          display: 'flex',
-          gap: '8px',
-          alignItems: 'center',
+          bottom: '25px',
+          right: '30px',
+          width: '450px',
+          height: '10px',
+          backgroundColor: '#ffffff',
+          borderRadius: '4px',
         }}
-      >
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            style={{
-              width: '24px',
-              height: '12px',
-              borderRadius: '2px',
-              background: i % 3 === 0 ? '#00D4FF' : i % 3 === 1 ? '#FFD700' : 'rgba(255,255,255,0.2)',
-              opacity: String(1 - i * 0.08),
-              display: 'flex',
-            }}
-          />
-        ))}
-      </div>
+      />
     </div>
   );
 }

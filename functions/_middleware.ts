@@ -14,7 +14,7 @@ const BOT_UA_PATTERN =
   /Twitterbot|facebookexternalhit|Slackbot-LinkExpanding|Slackbot|LinkedInBot|TelegramBot|Discordbot|LINE|WhatsApp|Googlebot-Image|vkShare|W3C_Validator|Applebot/i;
 
 const SITE_URL = 'https://breakout.curionlab.com';
-const DEFAULT_OG_IMAGE = `${SITE_URL}/api/og`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/image.png`;
 const DEFAULT_TITLE = 'Business Card Breakout';
 const DEFAULT_DESCRIPTION = '名刺をブロック崩しゲームに！ SNSでシェアすると名刺画像が表示されます。';
 
