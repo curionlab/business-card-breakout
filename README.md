@@ -1,12 +1,12 @@
 # 🎮 Business Card Breakout
 
-[![Live Demo](https://img.shields.io/badge/🎮_Play-Live_Demo-blue?style=for-the-badge)](https://curionlab.github.io/business-card-breakout/)
+[![Live Demo](https://img.shields.io/badge/🎮_Play-Live_Demo-blue?style=for-the-badge)](https://breakout.curionlab.com/)
 [![npm version](https://img.shields.io/npm/v/business-card-breakout.svg)](https://www.npmjs.com/package/business-card-breakout)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Transform your business card into an interactive breakout game! A fun and creative way to showcase your contact information on your website or portfolio.
 
-## [🚀 Try Live Demo →](https://curionlab.github.io/business-card-breakout/)
+## [🚀 Try Live Demo →](https://breakout.curionlab.com/)
 
 ![Demo](./demo.gif)
 
@@ -164,7 +164,7 @@ engine.start();
 
 ## 🎨 Examples
 
-**[👉 See more examples in live demo](https://curionlab.github.io/business-card-breakout/)**
+**[👉 See more examples in live demo](https://breakout.curionlab.com/)**
 
 ### Japanese Business Card (Full)
 
@@ -269,7 +269,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 🔗 Links
 
-- **[🎮 Live Demo](https://curionlab.github.io/business-card-breakout/)** ⭐
+- **[🎮 Live Demo](https://breakout.curionlab.com/)** ⭐
 - [GitHub Repository](https://github.com/curionlab/business-card-breakout)
 - [npm Package](https://www.npmjs.com/package/business-card-breakout)
 - [CDN (jsDelivr)](https://cdn.jsdelivr.net/npm/business-card-breakout@latest/)
