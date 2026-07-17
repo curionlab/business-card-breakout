@@ -10,13 +10,13 @@
  *   company  - 会社名
  */
 
-// Cloudflare Pages Functions ランタイム向け: satori/wasm エントリーポイント使用
+// Cloudflare Pages Functions ランタイム向け: satori/standalone エントリーポイント使用
 // @ts-ignore
 import initYoga from 'yoga-wasm-web';
 // @ts-ignore
 import { initWasm as initResvg, Resvg } from '@resvg/resvg-wasm';
 // @ts-ignore
-import satori from 'satori/wasm';
+import satori, { init as initSatori } from 'satori/standalone';
 
 // WASM バイナリの URL（CDN経由でフェッチ）
 const YOGA_WASM_URL  = 'https://cdn.jsdelivr.net/npm/yoga-wasm-web@0.3.3/dist/yoga.wasm';
@@ -36,7 +36,7 @@ async function ensureInitialized() {
     fetch(RESVG_WASM_URL).then(r => r.arrayBuffer()),
   ]);
   const yoga = await initYoga(yogaWasmData);
-  satori.init(yoga);
+  await initSatori(yoga);
   await initResvg(resvgWasmData);
   initialized = true;
 }
