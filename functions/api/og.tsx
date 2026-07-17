@@ -1,18 +1,23 @@
 /**
  * /api/og - Dynamic OGP image generation endpoint
- * Generates a 1200x630 PNG business card image using @cloudflare/pages-plugin-vercel-og
+ * Generates a 1200x630 PNG business card image using @cf-wasm/og/workerd
  */
 
 import React from 'react';
-import { ImageResponse } from '@cloudflare/pages-plugin-vercel-og/api';
+import { ImageResponse, CustomFont, cache } from '@cf-wasm/og/workerd';
 
 // Font URLs — Noto Sans JP (regular) from Google Fonts CDN
 const NOTO_SANS_JP_URL =
-  'https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEi75g.woff2';
-const NOTO_SANS_URL =
-  'https://fonts.gstatic.com/s/notosans/v36/o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5a7du3mhPy0.woff2';
+  'https://fonts.gstatic.com/s/notosansjp/v56/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEj75s.ttf';
+const NOTO_SANS_URL_400 =
+  'https://fonts.gstatic.com/s/notosans/v42/o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjcz6L1SoM-jCpoiyD9A99d.ttf';
+const NOTO_SANS_URL_700 =
+  'https://fonts.gstatic.com/s/notosans/v42/o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjcz6L1SoM-jCpoiyAaBN9d.ttf';
 
 export const onRequest: PagesFunction = async (context) => {
+  // Required by @cf-wasm/og
+  cache.setExecutionContext(context);
+
   const url = new URL(context.request.url);
   const name    = (url.searchParams.get('name')    ?? '').slice(0, 30);
   const nameEn  = (url.searchParams.get('nameEn')  ?? '').slice(0, 40);
@@ -20,23 +25,19 @@ export const onRequest: PagesFunction = async (context) => {
   const company = (url.searchParams.get('company') ?? '').slice(0, 50);
 
   try {
-    // Fetch fonts in parallel
-    const [jpFontData, enFontData] = await Promise.all([
-      fetch(NOTO_SANS_JP_URL).then(r => r.arrayBuffer()),
-      fetch(NOTO_SANS_URL).then(r => r.arrayBuffer()),
-    ]);
+    const fonts = [
+      new CustomFont('NotoSansJP', () => fetch(NOTO_SANS_JP_URL).then(r => r.arrayBuffer()), { weight: 400 }),
+      new CustomFont('NotoSans', () => fetch(NOTO_SANS_URL_400).then(r => r.arrayBuffer()), { weight: 400 }),
+      new CustomFont('NotoSans', () => fetch(NOTO_SANS_URL_700).then(r => r.arrayBuffer()), { weight: 700 }),
+    ];
 
-    // Return an ImageResponse using the official Cloudflare Satori plugin.
-    return new ImageResponse(
+    // Return an ImageResponse using cf-wasm/og
+    return await ImageResponse.async(
       <CardLayout name={name} nameEn={nameEn} title={title} company={company} />,
       {
         width: 1200,
         height: 630,
-        fonts: [
-          { name: 'NotoSansJP', data: jpFontData, weight: 400, style: 'normal' },
-          { name: 'NotoSans',   data: enFontData, weight: 400, style: 'normal' },
-          { name: 'NotoSans',   data: enFontData, weight: 700, style: 'normal' },
-        ],
+        fonts: fonts,
         headers: {
           'Cache-Control': 'public, max-age=86400, s-maxage=86400',
         }

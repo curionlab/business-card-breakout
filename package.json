@@ -59,6 +59,7 @@
     "wrangler": "^4.112.0"
   },
   "dependencies": {
+    "@cf-wasm/og": "^0.4.1",
     "@cloudflare/pages-plugin-vercel-og": "^0.1.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
