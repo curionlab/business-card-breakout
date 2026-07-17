@@ -1,6 +1,7 @@
 /**
  * /api/og - Dynamic OGP image generation endpoint
- * Generates a 1200x630 PNG business card image using @cf-wasm/og (workerd runtime)
+ * Generates a 1200x630 PNG business card image
+ * Stack: satori/wasm + yoga-wasm-web + @resvg/resvg-wasm
  *
  * Query params:
  *   name     - 名前 (Japanese)
@@ -9,18 +10,38 @@
  *   company  - 会社名
  */
 
+// Cloudflare Pages Functions ランタイム向け: satori/wasm エントリーポイント使用
 // @ts-ignore
-import { ImageResponse, cache, GoogleFont } from '@cf-wasm/og/workerd';
+import initYoga from 'yoga-wasm-web';
+// @ts-ignore
+import { initWasm as initResvg, Resvg } from '@resvg/resvg-wasm';
+// @ts-ignore
+import satori from 'satori/wasm';
 
-// Font URLs — Noto Sans JP from Google Fonts
-const JP_FONT  = new GoogleFont('Noto Sans JP', { weight: 400 });
-const EN_FONT  = new GoogleFont('Noto Sans',    { weight: 400 });
+// WASM バイナリの URL（CDN経由でフェッチ）
+const YOGA_WASM_URL  = 'https://cdn.jsdelivr.net/npm/yoga-wasm-web@0.3.3/dist/yoga.wasm';
+const RESVG_WASM_URL = 'https://cdn.jsdelivr.net/npm/@resvg/resvg-wasm@2.6.2/index_bg.wasm';
+
+// フォント URL（Google Fonts CDN）
+const NOTO_SANS_JP_URL = 'https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEi75g.woff2';
+const NOTO_SANS_URL    = 'https://fonts.gstatic.com/s/notosans/v36/o-0mIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5a7du3mhPy0.woff2';
+
+// 初期化済みフラグ（isolate内で再利用）
+let initialized = false;
+
+async function ensureInitialized() {
+  if (initialized) return;
+  const [yogaWasmData, resvgWasmData] = await Promise.all([
+    fetch(YOGA_WASM_URL).then(r => r.arrayBuffer()),
+    fetch(RESVG_WASM_URL).then(r => r.arrayBuffer()),
+  ]);
+  const yoga = await initYoga(yogaWasmData);
+  satori.init(yoga);
+  await initResvg(resvgWasmData);
+  initialized = true;
+}
 
 export const onRequest: PagesFunction = async (context) => {
-  // @cf-wasm/og のキャッシュに実行コンテキストを渡す（必須）
-  // @ts-ignore
-  cache.setExecutionContext(context);
-
   const url = new URL(context.request.url);
   const name    = (url.searchParams.get('name')    ?? '').slice(0, 30);
   const nameEn  = (url.searchParams.get('nameEn')  ?? '').slice(0, 40);
@@ -28,24 +49,43 @@ export const onRequest: PagesFunction = async (context) => {
   const company = (url.searchParams.get('company') ?? '').slice(0, 50);
 
   try {
-    // @ts-ignore
-    const response = await ImageResponse.async(
+    // WASM 初期化（初回のみ）
+    await ensureInitialized();
+
+    // フォントを並列取得
+    const [jpFontData, enFontData] = await Promise.all([
+      fetch(NOTO_SANS_JP_URL).then(r => r.arrayBuffer()),
+      fetch(NOTO_SANS_URL).then(r => r.arrayBuffer()),
+    ]);
+
+    // Satori で SVG 生成
+    const svg = await satori(
       buildCardElement(name, nameEn, title, company),
       {
         width: 1200,
         height: 630,
-        fonts: [JP_FONT, EN_FONT],
+        fonts: [
+          { name: 'NotoSansJP', data: jpFontData, weight: 400, style: 'normal' as const },
+          { name: 'NotoSans',   data: enFontData, weight: 400, style: 'normal' as const },
+        ],
       }
     );
 
-    // キャッシュヘッダーを付与して返す
-    const headers = new Headers(response.headers);
-    headers.set('Cache-Control', 'public, max-age=86400, s-maxage=86400');
-    return new Response(response.body, { status: response.status, headers });
+    // SVG → PNG
+    const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
+    const png = resvg.render().asPng();
+
+    return new Response(png, {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+      },
+    });
 
   } catch (err) {
-    console.error('[og] image generation error:', err);
-    return new Response('Image generation failed', { status: 500 });
+    console.error('[og] error:', err);
+    return new Response(String(err), { status: 500 });
   }
 };
 

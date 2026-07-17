@@ -51,7 +51,6 @@
   },
   "homepage": "https://github.com/curionlab/business-card-breakout#readme",
   "devDependencies": {
-    "@cloudflare/pages-plugin-vercel-og": "^0.1.2",
     "@types/node": "^20.10.0",
     "terser": "^5.44.1",
     "typescript": "^5.3.3",
@@ -60,7 +59,8 @@
     "wrangler": "^4.112.0"
   },
   "dependencies": {
-    "@cf-wasm/og": "^0.4.1",
-    "satori": "^0.28.0"
+    "@resvg/resvg-wasm": "^2.6.2",
+    "satori": "^0.28.0",
+    "yoga-wasm-web": "^0.3.3"
   }
 }
