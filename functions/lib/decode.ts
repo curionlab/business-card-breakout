@@ -201,11 +201,53 @@ export interface CardData {
   layout?: string;
 }
 
+export const FIELD_MAX_LENGTHS: Record<string, number> = {
+  name: 50,
+  nameEn: 50,
+  title: 100,
+  tagline: 150,
+  company: 100,
+  email: 100,
+  phone: 30,
+  sns: 150,
+  website: 200,
+};
+
 export function decodeCardData(compressed: string | null): CardData {
   if (!compressed) return {};
   try {
     const json = decompressFromEncodedURIComponent(compressed);
-    return JSON.parse(json) as CardData;
+    const data = JSON.parse(json);
+    
+    // 型安全性のチェック (null, 配列, オブジェクト以外を排除)
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      return {};
+    }
+
+    const validatedData: CardData = {};
+    const keys: (keyof CardData)[] = [
+      'name', 'nameEn', 'title', 'tagline', 'company', 
+      'email', 'phone', 'sns', 'website', 'layout'
+    ];
+
+    for (const key of keys) {
+      if (key in data && data[key] !== undefined && data[key] !== null) {
+        if (key === 'layout') {
+          // レイアウト値の安全確認
+          const layoutVal = String(data[key]);
+          if (['standard', 'professional', 'minimal'].includes(layoutVal)) {
+            validatedData.layout = layoutVal;
+          }
+        } else {
+          // 各文字列フィールドの切り詰め
+          const rawVal = String(data[key]);
+          const maxLen = FIELD_MAX_LENGTHS[key] || 100;
+          validatedData[key] = rawVal.substring(0, maxLen);
+        }
+      }
+    }
+
+    return validatedData;
   } catch {
     return {};
   }

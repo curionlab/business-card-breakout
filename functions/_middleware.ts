@@ -65,10 +65,12 @@ export const onRequest: PagesFunction = async (context) => {
     ogImageUrl = `${SITE_URL}/api/og?d=${compressed}`;
   }
 
-  // HTMLエスケープ
+  // HTMLエスケープ（シングルクォート、バッククォートもエスケープ対象に追加）
   const esc = (s: string) =>
     s.replace(/&/g, '&amp;')
      .replace(/"/g, '&quot;')
+     .replace(/'/g, '&#39;')
+     .replace(/`/g, '&#96;')
      .replace(/</g, '&lt;')
      .replace(/>/g, '&gt;');
 

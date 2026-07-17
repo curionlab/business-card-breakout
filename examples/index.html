@@ -403,47 +403,47 @@
       <div class="form-section">
         <div class="form-group">
           <label for="nameInput">Name</label>
-          <input type="text" id="nameInput" />
+          <input type="text" id="nameInput" maxlength="50" />
         </div>
         
         <div class="form-group">
           <label for="nameEnInput">Name (English)</label>
-          <input type="text" id="nameEnInput" placeholder="Optional" />
+          <input type="text" id="nameEnInput" placeholder="Optional" maxlength="50" />
         </div>
         
         <div class="form-group">
           <label for="titleInput">Title / Position</label>
-          <input type="text" id="titleInput" />
+          <input type="text" id="titleInput" maxlength="100" />
         </div>
         
         <div class="form-group">
           <label for="taglineInput">Tagline / Catchphrase</label>
-          <input type="text" id="taglineInput" placeholder="Optional" />
+          <input type="text" id="taglineInput" placeholder="Optional" maxlength="150" />
         </div>
         
         <div class="form-group">
           <label for="companyInput">Company</label>
-          <input type="text" id="companyInput" />
+          <input type="text" id="companyInput" maxlength="100" />
         </div>
         
         <div class="form-group">
           <label for="emailInput">Email</label>
-          <input type="text" id="emailInput" />
+          <input type="text" id="emailInput" maxlength="100" />
         </div>
         
         <div class="form-group">
           <label for="phoneInput">Phone</label>
-          <input type="tel" id="phoneInput" placeholder="電話番号" />
+          <input type="tel" id="phoneInput" placeholder="電話番号" maxlength="30" />
         </div>
         
         <div class="form-group">
           <label for="snsInput">SNS</label>
-          <input type="text" id="snsInput" placeholder="SNS (X/LinkedIn etc.)" />
+          <input type="text" id="snsInput" placeholder="SNS (X/LinkedIn etc.)" maxlength="150" />
         </div>
         
         <div class="form-group">
           <label for="websiteInput">Website</label>
-          <input type="text" id="websiteInput" />
+          <input type="text" id="websiteInput" maxlength="200" />
         </div>
         
         <div class="form-group" style="grid-column: 1 / 0;">
@@ -505,6 +505,18 @@
       phone: 'phoneInput',
       sns: 'snsInput',
       website: 'websiteInput',
+    };
+
+    const FIELD_MAX_LENGTHS = {
+      name: 50,
+      nameEn: 50,
+      title: 100,
+      tagline: 150,
+      company: 100,
+      email: 100,
+      phone: 30,
+      sns: 150,
+      website: 200,
     };
 
     const SUPPORTED_LAYOUTS = ['standard', 'professional', 'minimal'];
@@ -589,11 +601,17 @@
           const json = LZString.decompressFromEncodedURIComponent(compressed);
           const data = JSON.parse(json);
 
-          // フォームに反映
+          // 型チェック (オブジェクトかつ null / 配列 でないことを保証)
+          if (!data || typeof data !== 'object' || Array.isArray(data)) {
+            throw new Error('Invalid JSON data format');
+          }
+
+          // フォームに反映（文字数上限で切り詰め）
           Object.entries(CARD_FIELD_TO_INPUT_ID).forEach(([field, inputId]) => {
             const element = document.getElementById(inputId);
             if (element && data[field]) {
-              element.value = data[field];
+              const val = String(data[field]).substring(0, FIELD_MAX_LENGTHS[field] || 100);
+              element.value = val;
               applied = true;
             }
           });
@@ -618,7 +636,9 @@
         }
         const element = document.getElementById(inputId);
         if (element) {
-          element.value = params.get(field) || '';
+          const rawVal = params.get(field) || '';
+          const val = rawVal.substring(0, FIELD_MAX_LENGTHS[field] || 100);
+          element.value = val;
           applied = true;
         }
       });
