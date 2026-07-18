@@ -230,6 +230,7 @@ export class GameEngine {
     this.gameCleared = false;
     this.particleSystem.clear();
     this.render();
+    this.canvas.dispatchEvent(new CustomEvent('gameRestart'));
   }
 
   /**
@@ -366,14 +367,20 @@ export class GameEngine {
     
     // ゲームオーバー判定（ボールが下に落ちた）
     if (this.ball.getBall().y > this.config.height + 50) {
-      this.gameOver = true;
-      this.gameRunning = false;
+      if (!this.gameOver) {
+        this.gameOver = true;
+        this.gameRunning = false;
+        this.canvas.dispatchEvent(new CustomEvent('gameEnd', { detail: { state: 'gameOver' } }));
+      }
     }
     
     // ゲームクリア判定
     if (this.blockManager.allBlocksDestroyed()) {
-      this.gameCleared = true;
-      this.gameRunning = false;
+      if (!this.gameCleared) {
+        this.gameCleared = true;
+        this.gameRunning = false;
+        this.canvas.dispatchEvent(new CustomEvent('gameEnd', { detail: { state: 'gameClear' } }));
+      }
     }
   }
 

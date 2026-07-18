@@ -580,6 +580,19 @@
       </div>
     </div>
 
+    <!-- 連絡先リンク表示用モーダル（ゲーム終了時） -->
+    <div id="contactModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3 class="modal-text" style="font-size: 20px; color: #00D4FF;">Contact Links</h3>
+        <div id="contactLinksContainer" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+          <!-- リンクがここに動的に追加されます -->
+        </div>
+        <div>
+          <button class="modal-close-btn" onclick="closeContactModal()">閉じる</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ページ最下部、bodyの一番下など -->
     <div class="page-footer">
       <a href="https://github.com/curionlab/business-card-breakout" target="_blank" rel="noopener" class="github-link">
@@ -676,9 +689,69 @@
         false
       );
 
+      // イベントリスナーの登録
+      const canvas = container.querySelector('canvas');
+      if (canvas) {
+        canvas.addEventListener('gameEnd', showContactLinks);
+        canvas.addEventListener('gameRestart', hideContactLinks);
+      }
+
       // 明示的に開始
       gameEngine.start();
     };
+
+    function showContactLinks() {
+      const info = readBusinessCardInfo();
+      const container = document.getElementById('contactLinksContainer');
+      container.innerHTML = '';
+      
+      const addLink = (text, href) => {
+        if (!text) return;
+        const a = document.createElement('a');
+        a.href = href;
+        a.textContent = text;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.style.display = 'block';
+        a.style.padding = '12px 20px';
+        a.style.background = 'rgba(255, 255, 255, 0.1)';
+        a.style.border = '2px solid #00D4FF';
+        a.style.borderRadius = '8px';
+        a.style.color = '#ffffff';
+        a.style.textDecoration = 'none';
+        a.style.fontWeight = 'bold';
+        a.style.transition = 'all 0.3s ease';
+        a.style.cursor = 'pointer';
+        a.onmouseover = () => a.style.background = 'rgba(255,255,255,0.2)';
+        a.onmouseout = () => a.style.background = 'rgba(255, 255, 255, 0.1)';
+        container.appendChild(a);
+      };
+
+      if (info.email) addLink('📧 ' + info.email, 'mailto:' + info.email);
+      if (info.phone) addLink('📞 ' + info.phone, 'tel:' + info.phone);
+      if (info.website) {
+        let url = info.website;
+        if (!url.startsWith('http')) url = 'https://' + url;
+        addLink('🌐 ' + info.website, url);
+      }
+      if (info.sns) {
+        let url = info.sns;
+        if (!url.startsWith('http')) url = 'https://' + url;
+        addLink('📱 ' + info.sns, url);
+      }
+      
+      if (container.children.length > 0) {
+        document.getElementById('contactModal').classList.add('active');
+      }
+    }
+    
+    window.closeContactModal = function() {
+      document.getElementById('contactModal').classList.remove('active');
+    };
+    
+    function hideContactLinks() {
+      window.closeContactModal();
+    }
 
     window.startGame = function () {
       const businessCardInfo = readBusinessCardInfo();
