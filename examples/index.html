@@ -431,6 +431,8 @@
       box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
       transform: scale(0.9);
       transition: transform 0.3s ease;
+      max-height: 85vh;
+      overflow-y: auto;
     }
     .modal-overlay.active .modal-content {
       transform: scale(1);
@@ -585,7 +587,7 @@
     <div id="contactModal" class="modal-overlay">
       <div class="modal-content">
         <h3 class="modal-text" style="font-size: 20px; color: #00D4FF;">Contact Information</h3>
-        <div id="contactLinksContainer" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+        <div id="contactLinksContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
           <!-- リンクがここに動的に追加されます -->
         </div>
         <div>
@@ -705,7 +707,7 @@
         row.style.display = 'flex';
         row.style.flexDirection = 'column';
         row.style.alignItems = 'flex-start';
-        row.style.padding = '10px 15px';
+        row.style.padding = '8px 12px';
         row.style.background = 'rgba(255, 255, 255, 0.05)';
         row.style.borderLeft = '3px solid #00D4FF';
         row.style.borderRadius = '4px';
@@ -734,8 +736,9 @@
           valueEl.style.WebkitUserSelect = 'all';
         }
         valueEl.textContent = value;
-        valueEl.style.fontSize = '16px';
+        valueEl.style.fontSize = '15px';
         valueEl.style.fontWeight = 'bold';
+        valueEl.style.wordBreak = 'break-all';
 
         row.appendChild(labelEl);
         row.appendChild(valueEl);
