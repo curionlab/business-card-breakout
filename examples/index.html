@@ -772,14 +772,15 @@
         // ── 解像度定義（91mm × 55mm @ 300DPI）──
         const PRINT_W = 1075;  // Math.round(91 * 300 / 25.4)
         const PRINT_H = 650;   // Math.round(55 * 300 / 25.4)
-        const QR_SIZE = 140;   // QRコードの正方形サイズ（px）
+        const QR_SIZE = 220;   // QRコードの正方形サイズ（px）を読み取りやすく拡大
         const MARGIN = 32;     // 外周マージン
 
         // ── QRコード生成 ──
         const qr = qrcode(0, 'M');
         qr.addData(shareUrl);
         qr.make();
-        const qrDataUrl = qr.createDataURL(4, 0);
+        // セルサイズを大きくして、元画像がボヤけないようにする
+        const qrDataUrl = qr.createDataURL(10, 0);
         const qrImg = await new Promise((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve(img);
@@ -846,30 +847,31 @@
         // ── レイアウト別テキスト描画 ──
         if (layout === 'standard') {
           // --- Standard: 左揃え、QR右下 ---
-          const textAreaW = PRINT_W * 0.75;  // テキスト領域は左75%
-          const pad = MARGIN;
-          let cy = MARGIN;
+          const pad = Math.round(PRINT_W * 0.08);
+          // QRコード（右下）と被らないようにテキスト領域を制限
+          const textAreaW = PRINT_W - QR_SIZE - MARGIN * 2;
+          let cy = Math.round(MARGIN * 1.5);
           const lineGap = 1.15;
 
           // 名前
           if (businessCardInfo.name) {
             ctx.fillStyle = COLORS.name;
             const fs = Math.round(PRINT_H * 0.115);
-            const h = drawText(businessCardInfo.name, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.name));
+            const h = drawText(businessCardInfo.name, pad, cy, textAreaW - pad, fs, getFontFamily(businessCardInfo.name));
             cy += h * lineGap + 4;
           }
           // 肩書き
           if (businessCardInfo.title) {
             ctx.fillStyle = COLORS.title;
             const fs = Math.round(PRINT_H * 0.065);
-            const h = drawText(businessCardInfo.title, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.title));
+            const h = drawText(businessCardInfo.title, pad, cy, textAreaW - pad, fs, getFontFamily(businessCardInfo.title));
             cy += h * lineGap + 4;
           }
           // 会社
           if (businessCardInfo.company) {
             ctx.fillStyle = COLORS.company;
             const fs = Math.round(PRINT_H * 0.075);
-            const h = drawText(businessCardInfo.company, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.company));
+            const h = drawText(businessCardInfo.company, pad, cy, textAreaW - pad, fs, getFontFamily(businessCardInfo.company));
             cy += h * lineGap + 8;
           }
           // 連絡先
@@ -882,7 +884,7 @@
           ].forEach(({ data, color }) => {
             if (!data) return;
             ctx.fillStyle = color;
-            const h = drawText(data, pad, cy, textAreaW - pad * 2, cfs, getFontFamily(data));
+            const h = drawText(data, pad, cy, textAreaW - pad, cfs, getFontFamily(data));
             cy += h * lineGap + 3;
           });
 
@@ -903,50 +905,51 @@
 
         } else if (layout === 'professional') {
           // --- Professional: 会社名中央、名前左、QR右下 ---
-          const textAreaW = PRINT_W * 0.75;
-          const pad = MARGIN;
-          let cy = MARGIN;
-          const cx_center = textAreaW / 2;
+          const pad = Math.round(PRINT_W * 0.08);
+          // QRコード（右下）と被らないようにテキスト領域を制限
+          const textAreaW = PRINT_W - QR_SIZE - MARGIN * 2;
+          let cy = Math.round(MARGIN * 1.5);
+          const cx_center = PRINT_W / 2;
 
           // 会社名（中央）
           if (businessCardInfo.company) {
             ctx.fillStyle = COLORS.company;
             const fs = Math.round(PRINT_H * 0.105);
-            const h = drawText(businessCardInfo.company, cx_center, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.company), 'center');
+            const h = drawText(businessCardInfo.company, cx_center, cy, PRINT_W - pad * 2, fs, getFontFamily(businessCardInfo.company), 'center');
             cy += h * 1.3 + 4;
           }
           // タグライン（中央）
           if (businessCardInfo.tagline) {
             ctx.fillStyle = COLORS.tagline;
             const fs = Math.round(PRINT_H * 0.048);
-            const h = drawText(businessCardInfo.tagline, cx_center, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.tagline), 'center');
+            const h = drawText(businessCardInfo.tagline, cx_center, cy, PRINT_W - pad * 2, fs, getFontFamily(businessCardInfo.tagline), 'center');
             cy += h * 1.9 + 4;
           }
           // 名前（左）
           if (businessCardInfo.name) {
             ctx.fillStyle = COLORS.name;
             const fs = Math.round(PRINT_H * 0.140);
-            const h = drawText(businessCardInfo.name, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.name));
+            const h = drawText(businessCardInfo.name, pad, cy, textAreaW - pad, fs, getFontFamily(businessCardInfo.name));
             cy += h * 1.35 + 2;
           }
           // 英語名（左）
           if (businessCardInfo.nameEn) {
             ctx.fillStyle = COLORS.nameEn;
             const fs = Math.round(PRINT_H * 0.060);
-            const h = drawText(businessCardInfo.nameEn, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.nameEn));
+            const h = drawText(businessCardInfo.nameEn, pad, cy, textAreaW - pad, fs, getFontFamily(businessCardInfo.nameEn));
             cy += h * 1.4 + 18;
           }
           // 肩書き（左）
           if (businessCardInfo.title) {
             ctx.fillStyle = COLORS.title;
             const fs = Math.round(PRINT_H * 0.062);
-            const h = drawText(businessCardInfo.title, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.title));
+            const h = drawText(businessCardInfo.title, pad, cy, textAreaW - pad, fs, getFontFamily(businessCardInfo.title));
             cy += h * 1.8 + 2;
           }
           // 連絡先（ラベル付き2列）
           const cfs = Math.round(PRINT_H * 0.048);
-          const labelW = (textAreaW - pad * 2) * 0.18;
-          const gap = (textAreaW - pad * 2) * 0.01;
+          const labelW = (textAreaW - pad) * 0.18;
+          const gap = (textAreaW - pad) * 0.01;
           [
             { label: 'Email',   data: businessCardInfo.email,   color: COLORS.email },
             { label: 'Phone',   data: businessCardInfo.phone,   color: COLORS.phone },
@@ -957,7 +960,7 @@
             ctx.fillStyle = 'rgba(200,200,220,0.7)';
             const lh = drawText(label, pad, cy, labelW, cfs, getFontFamily(label));
             ctx.fillStyle = color;
-            const dh = drawText(data, pad + labelW + gap, cy, textAreaW - pad * 2 - labelW - gap, cfs, getFontFamily(data));
+            const dh = drawText(data, pad + labelW + gap, cy, textAreaW - pad - labelW - gap, cfs, getFontFamily(data));
             cy += Math.max(lh, dh) * 1.4 + 3;
           });
 
@@ -978,27 +981,25 @@
           // --- Minimal: 全要素中央揃え、QR下中央 ---
           const pad = MARGIN;
           const cx = PRINT_W / 2;
-          // QRを下に配置するため、テキスト描画エリアを上部80%に絞る
-          const textAreaH = PRINT_H * 0.72;
-          let cy = MARGIN * 1.5;
+          let cy = Math.round(MARGIN * 1.5);
 
           // 名前（中央・大）
           if (businessCardInfo.name) {
             ctx.fillStyle = COLORS.name;
-            const fs = Math.round(PRINT_H * 0.140);
+            const fs = Math.round(PRINT_H * 0.110);
             const h = drawText(businessCardInfo.name, cx, cy, PRINT_W - pad * 2, fs, getFontFamily(businessCardInfo.name), 'center');
-            cy += h * 1.6 + 4;
+            cy += h * 1.3 + 4;
           }
           // 肩書き | 会社（中央・1行）
           const titleText = [businessCardInfo.title, businessCardInfo.company].filter(Boolean).join(' | ');
           if (titleText) {
             ctx.fillStyle = COLORS.title;
-            const fs = Math.round(PRINT_H * 0.055);
+            const fs = Math.round(PRINT_H * 0.045);
             const h = drawText(titleText, cx, cy, PRINT_W - pad * 2, fs, getFontFamily(titleText), 'center');
-            cy += h * 2.5 + 4;
+            cy += h * 2.0 + 4;
           }
           // 連絡先（中央）
-          const cfs = Math.round(PRINT_H * 0.042);
+          const cfs = Math.round(PRINT_H * 0.035);
           [
             { data: businessCardInfo.email,   color: COLORS.email },
             { data: businessCardInfo.phone,   color: COLORS.phone },
@@ -1008,7 +1009,7 @@
             if (!data) return;
             ctx.fillStyle = color;
             const h = drawText(data, cx, cy, PRINT_W - pad * 2, cfs, getFontFamily(data), 'center');
-            cy += h * 1.6 + 3;
+            cy += h * 1.4 + 3;
           });
 
           // QR コード: 下中央
