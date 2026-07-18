@@ -567,6 +567,7 @@
     <div class="shared-only-actions">
       <!-- 編集ボタンを追加（onclickイベントを設定） -->
       <!--<button id="editCardBtn" class="edit-btn" onclick="enableEditMode()">Edit this card</button>-->
+      <button class="create-btn" style="background: transparent; border: 2px solid #00D4FF; color: #00D4FF; margin-right: 15px; cursor: pointer;" onclick="showContactLinks()">CONTACTS</button>
       <a href="." class="create-btn">CREATE NEW</a>
     </div>
     <!-- モーダルダイアログ（スマホ用画像長押し保存） -->
@@ -583,7 +584,7 @@
     <!-- 連絡先リンク表示用モーダル（ゲーム終了時） -->
     <div id="contactModal" class="modal-overlay">
       <div class="modal-content">
-        <h3 class="modal-text" style="font-size: 20px; color: #00D4FF;">Contact Links</h3>
+        <h3 class="modal-text" style="font-size: 20px; color: #00D4FF;">Contact Information</h3>
         <div id="contactLinksContainer" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
           <!-- リンクがここに動的に追加されます -->
         </div>
@@ -689,69 +690,84 @@
         false
       );
 
-      // イベントリスナーの登録
-      const canvas = container.querySelector('canvas');
-      if (canvas) {
-        canvas.addEventListener('gameEnd', showContactLinks);
-        canvas.addEventListener('gameRestart', hideContactLinks);
-      }
-
       // 明示的に開始
       gameEngine.start();
     };
 
-    function showContactLinks() {
+    window.showContactLinks = function() {
       const info = readBusinessCardInfo();
       const container = document.getElementById('contactLinksContainer');
       container.innerHTML = '';
       
-      const addLink = (text, href) => {
-        if (!text) return;
-        const a = document.createElement('a');
-        a.href = href;
-        a.textContent = text;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.style.display = 'block';
-        a.style.padding = '12px 20px';
-        a.style.background = 'rgba(255, 255, 255, 0.1)';
-        a.style.border = '2px solid #00D4FF';
-        a.style.borderRadius = '8px';
-        a.style.color = '#ffffff';
-        a.style.textDecoration = 'none';
-        a.style.fontWeight = 'bold';
-        a.style.transition = 'all 0.3s ease';
-        a.style.cursor = 'pointer';
-        a.onmouseover = () => a.style.background = 'rgba(255,255,255,0.2)';
-        a.onmouseout = () => a.style.background = 'rgba(255, 255, 255, 0.1)';
-        container.appendChild(a);
+      const addInfoRow = (label, value, isLink = false, href = '') => {
+        if (!value) return;
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.flexDirection = 'column';
+        row.style.alignItems = 'flex-start';
+        row.style.padding = '10px 15px';
+        row.style.background = 'rgba(255, 255, 255, 0.05)';
+        row.style.borderLeft = '3px solid #00D4FF';
+        row.style.borderRadius = '4px';
+        row.style.textAlign = 'left';
+
+        const labelEl = document.createElement('span');
+        labelEl.textContent = label;
+        labelEl.style.fontSize = '12px';
+        labelEl.style.color = '#00D4FF';
+        labelEl.style.marginBottom = '4px';
+        
+        let valueEl;
+        if (isLink) {
+          valueEl = document.createElement('a');
+          valueEl.href = href;
+          valueEl.target = '_blank';
+          valueEl.rel = 'noopener';
+          valueEl.style.color = '#ffffff';
+          valueEl.style.textDecoration = 'underline';
+          valueEl.style.cursor = 'pointer';
+        } else {
+          valueEl = document.createElement('span');
+          valueEl.style.color = '#ffffff';
+          // user-select for easy copying
+          valueEl.style.userSelect = 'all';
+          valueEl.style.WebkitUserSelect = 'all';
+        }
+        valueEl.textContent = value;
+        valueEl.style.fontSize = '16px';
+        valueEl.style.fontWeight = 'bold';
+
+        row.appendChild(labelEl);
+        row.appendChild(valueEl);
+        container.appendChild(row);
       };
 
-      if (info.email) addLink('📧 ' + info.email, 'mailto:' + info.email);
-      if (info.phone) addLink('📞 ' + info.phone, 'tel:' + info.phone);
+      addInfoRow('Name', info.name);
+      addInfoRow('Name (En)', info.nameEn);
+      addInfoRow('Company', info.company);
+      addInfoRow('Title', info.title);
+      
+      if (info.email) addInfoRow('Email', info.email, true, 'mailto:' + info.email);
+      if (info.phone) addInfoRow('Phone', info.phone, true, 'tel:' + info.phone);
       if (info.website) {
         let url = info.website;
         if (!url.startsWith('http')) url = 'https://' + url;
-        addLink('🌐 ' + info.website, url);
+        addInfoRow('Website', info.website, true, url);
       }
       if (info.sns) {
         let url = info.sns;
         if (!url.startsWith('http')) url = 'https://' + url;
-        addLink('📱 ' + info.sns, url);
+        addInfoRow('SNS', info.sns, true, url);
       }
       
       if (container.children.length > 0) {
         document.getElementById('contactModal').classList.add('active');
       }
-    }
+    };
     
     window.closeContactModal = function() {
       document.getElementById('contactModal').classList.remove('active');
     };
-    
-    function hideContactLinks() {
-      window.closeContactModal();
-    }
 
     window.startGame = function () {
       const businessCardInfo = readBusinessCardInfo();
