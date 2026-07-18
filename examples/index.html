@@ -31,6 +31,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@400&family=DotGothic16&family=Press+Start+2P&family=ZCOOL+QingKe+HuangYou&family=Noto+Sans+Thai&family=Noto+Sans+Arabic&family=Noto+Sans+KR&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
   <style>
   * {
@@ -188,6 +189,24 @@
     .btn-secondary:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+    }
+
+    .btn-print {
+      background: linear-gradient(135deg, #34D399, #059669);
+      color: white;
+      box-shadow: 0 4px 15px rgba(52, 211, 153, 0.4);
+      margin-bottom: 8px;
+    }
+
+    .btn-print:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(52, 211, 153, 0.6);
+    }
+
+    .btn-print:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
     }
 
 
@@ -459,6 +478,7 @@
       <div class="button-group">
         <button class="btn-primary" onclick="startGame()">START GAME</button>
         <button class="btn-secondary" onclick="shareBusinessCard()">SHARE CARD</button>
+        <button id="printBtn" class="btn-print" onclick="generatePrintImage()">🖨️ SAVE FOR PRINT</button>
       </div>
 
       <div id="gameContainer"></div>
@@ -732,6 +752,295 @@
       }
     };
 
+
+
+    /**
+     * QRコード付き名刺印刷用画像を生成してダウンロード
+     * 解像度: 1075×650px（名刺サイズ 91mm×55mm @ 300DPI）
+     */
+    window.generatePrintImage = async function () {
+      const btn = document.getElementById('printBtn');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Generating...';
+
+      try {
+        const businessCardInfo = readBusinessCardInfo();
+        const layout = document.getElementById('layoutSelect').value;
+        const shareUrl = createShareUrl(businessCardInfo, layout);
+
+        // ── 解像度定義（91mm × 55mm @ 300DPI）──
+        const PRINT_W = 1075;  // Math.round(91 * 300 / 25.4)
+        const PRINT_H = 650;   // Math.round(55 * 300 / 25.4)
+        const QR_SIZE = 140;   // QRコードの正方形サイズ（px）
+        const MARGIN = 32;     // 外周マージン
+
+        // ── QRコード生成 ──
+        const qr = qrcode(0, 'M');
+        qr.addData(shareUrl);
+        qr.make();
+        const qrDataUrl = qr.createDataURL(4, 0);
+        const qrImg = await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = qrDataUrl;
+        });
+
+        // ── Canvas セットアップ ──
+        const canvas = document.createElement('canvas');
+        canvas.width = PRINT_W;
+        canvas.height = PRINT_H;
+        const ctx = canvas.getContext('2d');
+
+        // ── 背景グラデーション ──
+        const bg = ctx.createLinearGradient(0, 0, PRINT_W, PRINT_H);
+        bg.addColorStop(0, '#1a1a2e');
+        bg.addColorStop(1, '#16213e');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, PRINT_W, PRINT_H);
+
+        // ── フォントファミリー判定（BlockManager と同じロジック） ──
+        const getFontFamily = (text) => {
+          if (!text) return '"Bitcount Prop Single", monospace';
+          if (/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(text)) return '"DotGothic16", monospace';
+          if (/[\uAC00-\uD7AF]/.test(text)) return '"Noto Sans KR", sans-serif';
+          if (/[\u0E00-\u0E7F]/.test(text)) return '"Noto Sans Thai", sans-serif';
+          if (/[\u0600-\u06FF]/.test(text)) return '"Noto Sans Arabic", sans-serif';
+          if (/[\u0400-\u04FF]/.test(text)) return '"Silkscreen", monospace';
+          return '"Bitcount Prop Single", "DotGothic16", monospace';
+        };
+
+        // ── テキスト描画ヘルパー（横幅オーバー時スケール縮小） ──
+        const drawText = (text, x, y, maxW, fontSize, fontFamily, align = 'left') => {
+          if (!text) return 0;
+          ctx.font = `${fontSize}px ${fontFamily}`;
+          ctx.textAlign = align;
+          ctx.textBaseline = 'top';
+          const w = ctx.measureText(text).width;
+          if (w <= maxW) {
+            ctx.fillText(text, x, y);
+          } else {
+            const scaleX = maxW / w;
+            ctx.save();
+            ctx.scale(scaleX, 1);
+            ctx.fillText(text, x / scaleX, y);
+            ctx.restore();
+          }
+          const m = ctx.measureText(text);
+          return m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+        };
+
+        const COLORS = {
+          company: '#60A5FA',
+          tagline: '#C084FC',
+          name:    '#F16584',
+          nameEn:  '#34D399',
+          title:   '#A78BFA',
+          email:   '#4ECDC4',
+          phone:   '#FB923C',
+          sns:     '#EC4899',
+          website: '#FBBF24',
+        };
+
+        // ── レイアウト別テキスト描画 ──
+        if (layout === 'standard') {
+          // --- Standard: 左揃え、QR右下 ---
+          const textAreaW = PRINT_W * 0.75;  // テキスト領域は左75%
+          const pad = MARGIN;
+          let cy = MARGIN;
+          const lineGap = 1.15;
+
+          // 名前
+          if (businessCardInfo.name) {
+            ctx.fillStyle = COLORS.name;
+            const fs = Math.round(PRINT_H * 0.115);
+            const h = drawText(businessCardInfo.name, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.name));
+            cy += h * lineGap + 4;
+          }
+          // 肩書き
+          if (businessCardInfo.title) {
+            ctx.fillStyle = COLORS.title;
+            const fs = Math.round(PRINT_H * 0.065);
+            const h = drawText(businessCardInfo.title, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.title));
+            cy += h * lineGap + 4;
+          }
+          // 会社
+          if (businessCardInfo.company) {
+            ctx.fillStyle = COLORS.company;
+            const fs = Math.round(PRINT_H * 0.075);
+            const h = drawText(businessCardInfo.company, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.company));
+            cy += h * lineGap + 8;
+          }
+          // 連絡先
+          const cfs = Math.round(PRINT_H * 0.048);
+          [
+            { data: businessCardInfo.email,   color: COLORS.email },
+            { data: businessCardInfo.phone,   color: COLORS.phone },
+            { data: businessCardInfo.sns,     color: COLORS.sns },
+            { data: businessCardInfo.website, color: COLORS.website },
+          ].forEach(({ data, color }) => {
+            if (!data) return;
+            ctx.fillStyle = color;
+            const h = drawText(data, pad, cy, textAreaW - pad * 2, cfs, getFontFamily(data));
+            cy += h * lineGap + 3;
+          });
+
+          // QR コード: 右下
+          const qrX = PRINT_W - QR_SIZE - MARGIN;
+          const qrY = PRINT_H - QR_SIZE - MARGIN;
+          // QRの背景（白い余白付き）
+          const qrPad = 8;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(qrX - qrPad, qrY - qrPad, QR_SIZE + qrPad * 2, QR_SIZE + qrPad * 2);
+          ctx.drawImage(qrImg, qrX, qrY, QR_SIZE, QR_SIZE);
+          // QR下ラベル
+          ctx.fillStyle = 'rgba(180,180,200,0.8)';
+          ctx.font = `${Math.round(PRINT_H * 0.030)}px "Bitcount Prop Single", monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText('SCAN TO PLAY', qrX + QR_SIZE / 2, qrY + QR_SIZE + qrPad + 4);
+
+        } else if (layout === 'professional') {
+          // --- Professional: 会社名中央、名前左、QR右下 ---
+          const textAreaW = PRINT_W * 0.75;
+          const pad = MARGIN;
+          let cy = MARGIN;
+          const cx_center = textAreaW / 2;
+
+          // 会社名（中央）
+          if (businessCardInfo.company) {
+            ctx.fillStyle = COLORS.company;
+            const fs = Math.round(PRINT_H * 0.105);
+            const h = drawText(businessCardInfo.company, cx_center, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.company), 'center');
+            cy += h * 1.3 + 4;
+          }
+          // タグライン（中央）
+          if (businessCardInfo.tagline) {
+            ctx.fillStyle = COLORS.tagline;
+            const fs = Math.round(PRINT_H * 0.048);
+            const h = drawText(businessCardInfo.tagline, cx_center, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.tagline), 'center');
+            cy += h * 1.9 + 4;
+          }
+          // 名前（左）
+          if (businessCardInfo.name) {
+            ctx.fillStyle = COLORS.name;
+            const fs = Math.round(PRINT_H * 0.140);
+            const h = drawText(businessCardInfo.name, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.name));
+            cy += h * 1.35 + 2;
+          }
+          // 英語名（左）
+          if (businessCardInfo.nameEn) {
+            ctx.fillStyle = COLORS.nameEn;
+            const fs = Math.round(PRINT_H * 0.060);
+            const h = drawText(businessCardInfo.nameEn, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.nameEn));
+            cy += h * 1.4 + 18;
+          }
+          // 肩書き（左）
+          if (businessCardInfo.title) {
+            ctx.fillStyle = COLORS.title;
+            const fs = Math.round(PRINT_H * 0.062);
+            const h = drawText(businessCardInfo.title, pad, cy, textAreaW - pad * 2, fs, getFontFamily(businessCardInfo.title));
+            cy += h * 1.8 + 2;
+          }
+          // 連絡先（ラベル付き2列）
+          const cfs = Math.round(PRINT_H * 0.048);
+          const labelW = (textAreaW - pad * 2) * 0.18;
+          const gap = (textAreaW - pad * 2) * 0.01;
+          [
+            { label: 'Email',   data: businessCardInfo.email,   color: COLORS.email },
+            { label: 'Phone',   data: businessCardInfo.phone,   color: COLORS.phone },
+            { label: 'SNS',     data: businessCardInfo.sns,     color: COLORS.sns },
+            { label: 'Website', data: businessCardInfo.website, color: COLORS.website },
+          ].forEach(({ label, data, color }) => {
+            if (!data) return;
+            ctx.fillStyle = 'rgba(200,200,220,0.7)';
+            const lh = drawText(label, pad, cy, labelW, cfs, getFontFamily(label));
+            ctx.fillStyle = color;
+            const dh = drawText(data, pad + labelW + gap, cy, textAreaW - pad * 2 - labelW - gap, cfs, getFontFamily(data));
+            cy += Math.max(lh, dh) * 1.4 + 3;
+          });
+
+          // QR コード: 右下
+          const qrX = PRINT_W - QR_SIZE - MARGIN;
+          const qrY = PRINT_H - QR_SIZE - MARGIN;
+          const qrPad = 8;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(qrX - qrPad, qrY - qrPad, QR_SIZE + qrPad * 2, QR_SIZE + qrPad * 2);
+          ctx.drawImage(qrImg, qrX, qrY, QR_SIZE, QR_SIZE);
+          ctx.fillStyle = 'rgba(180,180,200,0.8)';
+          ctx.font = `${Math.round(PRINT_H * 0.030)}px "Bitcount Prop Single", monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText('SCAN TO PLAY', qrX + QR_SIZE / 2, qrY + QR_SIZE + qrPad + 4);
+
+        } else if (layout === 'minimal') {
+          // --- Minimal: 全要素中央揃え、QR下中央 ---
+          const pad = MARGIN;
+          const cx = PRINT_W / 2;
+          // QRを下に配置するため、テキスト描画エリアを上部80%に絞る
+          const textAreaH = PRINT_H * 0.72;
+          let cy = MARGIN * 1.5;
+
+          // 名前（中央・大）
+          if (businessCardInfo.name) {
+            ctx.fillStyle = COLORS.name;
+            const fs = Math.round(PRINT_H * 0.140);
+            const h = drawText(businessCardInfo.name, cx, cy, PRINT_W - pad * 2, fs, getFontFamily(businessCardInfo.name), 'center');
+            cy += h * 1.6 + 4;
+          }
+          // 肩書き | 会社（中央・1行）
+          const titleText = [businessCardInfo.title, businessCardInfo.company].filter(Boolean).join(' | ');
+          if (titleText) {
+            ctx.fillStyle = COLORS.title;
+            const fs = Math.round(PRINT_H * 0.055);
+            const h = drawText(titleText, cx, cy, PRINT_W - pad * 2, fs, getFontFamily(titleText), 'center');
+            cy += h * 2.5 + 4;
+          }
+          // 連絡先（中央）
+          const cfs = Math.round(PRINT_H * 0.042);
+          [
+            { data: businessCardInfo.email,   color: COLORS.email },
+            { data: businessCardInfo.phone,   color: COLORS.phone },
+            { data: businessCardInfo.sns,     color: COLORS.sns },
+            { data: businessCardInfo.website, color: COLORS.website },
+          ].forEach(({ data, color }) => {
+            if (!data) return;
+            ctx.fillStyle = color;
+            const h = drawText(data, cx, cy, PRINT_W - pad * 2, cfs, getFontFamily(data), 'center');
+            cy += h * 1.6 + 3;
+          });
+
+          // QR コード: 下中央
+          const qrX = PRINT_W / 2 - QR_SIZE / 2;
+          const qrY = PRINT_H - QR_SIZE - MARGIN;
+          const qrPad = 8;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(qrX - qrPad, qrY - qrPad, QR_SIZE + qrPad * 2, QR_SIZE + qrPad * 2);
+          ctx.drawImage(qrImg, qrX, qrY, QR_SIZE, QR_SIZE);
+          ctx.fillStyle = 'rgba(180,180,200,0.8)';
+          ctx.font = `${Math.round(PRINT_H * 0.030)}px "Bitcount Prop Single", monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText('SCAN TO PLAY', PRINT_W / 2, qrY + QR_SIZE + qrPad + 4);
+        }
+
+        // ── PNG ダウンロード ──
+        const dataUrl = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        const safeName = (businessCardInfo.name || 'business_card').replace(/[^\w\u3040-\u9FAF\s-]/g, '').trim().replace(/\s+/g, '_');
+        a.download = `${safeName}_card_300dpi.png`;
+        a.href = dataUrl;
+        a.click();
+
+      } catch (err) {
+        console.error('印刷用画像の生成に失敗しました:', err);
+        alert('画像の生成に失敗しました。ブラウザのコンソールを確認してください。');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    };
 
 
     // 編集モードへ切り替え（共有モード解除）：未使用
